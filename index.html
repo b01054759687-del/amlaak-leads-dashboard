@@ -45,6 +45,15 @@
       scrollbar-width: thin;
       scrollbar-color: #c5a059 #0b192c;
     }
+    /* Force high contrast white labels across all ApexCharts */
+    .apexcharts-datalabel, 
+    .apexcharts-datalabels text, 
+    .apexcharts-data-labels text {
+      fill: #ffffff !important;
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.85) !important;
+    }
   </style>
 </head>
 <body class="p-2.5 sm:p-4 md:p-6 lg:p-8">
@@ -234,19 +243,19 @@
         <div class="text-[9px] sm:text-[10px] text-amber-300 font-bold mt-0.5">طلب خليجي مستهدف</div>
       </div>
 
-      <div class="glass-card rounded-2xl p-3 sm:p-4 border-l-4 border-l-purple-500 border-purple-500/30">
+      <div class="glass-card rounded-2xl p-3.5 sm:p-4 border-l-4 border-l-purple-500 border-purple-500/30">
         <div class="text-slate-400 text-[10px] sm:text-xs font-bold mb-0.5 sm:mb-1 flex justify-between">150 - 250م² <i class="fa-solid fa-ruler-combined text-purple-400"></i></div>
         <div id="kpiMidArea" class="text-xl sm:text-2xl md:text-3xl font-black font-['Outfit'] text-purple-300">104</div>
         <div class="text-[9px] sm:text-[10px] text-purple-400 font-bold mt-0.5">مساحات متوسطة</div>
       </div>
 
-      <div class="glass-card rounded-2xl p-3 sm:p-4 border-l-4 border-l-cyan-500 border-cyan-500/30">
+      <div class="glass-card rounded-2xl p-3.5 sm:p-4 border-l-4 border-l-cyan-500 border-cyan-500/30">
         <div class="text-slate-400 text-[10px] sm:text-xs font-bold mb-0.5 sm:mb-1 flex justify-between">قيد المتابعة / لم يرد <i class="fa-brands fa-whatsapp text-cyan-400"></i></div>
         <div id="kpiFollowup" class="text-xl sm:text-2xl md:text-3xl font-black font-['Outfit'] text-cyan-300">103</div>
         <div class="text-[9px] sm:text-[10px] text-cyan-400 font-bold mt-0.5">مكالمات معلقة ومتابعات</div>
       </div>
 
-      <div class="glass-card rounded-2xl p-3 sm:p-4 border-l-4 border-l-rose-500 border-rose-500/30">
+      <div class="glass-card rounded-2xl p-3.5 sm:p-4 border-l-4 border-l-rose-500 border-rose-500/30">
         <div class="text-slate-400 text-[10px] sm:text-xs font-bold mb-0.5 sm:mb-1 flex justify-between">غير مؤهلين <i class="fa-solid fa-ban text-rose-400"></i></div>
         <div id="kpiDisqualified" class="text-xl sm:text-2xl md:text-3xl font-black font-['Outfit'] text-rose-400">97</div>
         <div class="text-[9px] sm:text-[10px] text-rose-400 font-bold mt-0.5">مساحات < 150م</div>
@@ -256,7 +265,7 @@
     <!-- CHARTS ROW 1 -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-5 sm:mb-6">
       
-      <!-- 1. LEAD QUALIFICATION FUNNEL (WITH BULLETPROOF VISIBLE STATS) -->
+      <!-- 1. LEAD QUALIFICATION FUNNEL -->
       <div class="glass-card rounded-2xl p-3.5 sm:p-5">
         <div class="flex justify-between items-center mb-3">
           <h3 class="font-bold text-xs sm:text-sm md:text-base text-slate-200 flex items-center gap-2">
@@ -265,29 +274,28 @@
           <span class="text-[10px] text-amber-300 font-bold font-mono">أرقام ونسب حية</span>
         </div>
         
-        <!-- BULLETPROOF DIRECT HTML STATS BADGES -->
         <div class="grid grid-cols-3 gap-2 mb-3">
           <div class="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-center">
             <div class="text-[10px] text-emerald-400 font-bold">مؤهل ✅</div>
-            <div id="statQualCount" class="text-base sm:text-lg font-black text-emerald-300 font-['Outfit']">87</div>
-            <div id="statQualPct" class="text-[10px] text-emerald-400/80 font-bold font-mono">30.3%</div>
+            <div id="statQualCount" class="text-base sm:text-lg font-black text-white font-['Outfit']">87</div>
+            <div id="statQualPct" class="text-[10px] text-emerald-300 font-bold font-mono">30.3%</div>
           </div>
           <div class="p-2.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-center">
             <div class="text-[10px] text-rose-400 font-bold">غير مؤهل ❌</div>
-            <div id="statNotQualCount" class="text-base sm:text-lg font-black text-rose-300 font-['Outfit']">97</div>
-            <div id="statNotQualPct" class="text-[10px] text-rose-400/80 font-bold font-mono">33.8%</div>
+            <div id="statNotQualCount" class="text-base sm:text-lg font-black text-white font-['Outfit']">97</div>
+            <div id="statNotQualPct" class="text-[10px] text-rose-300 font-bold font-mono">33.8%</div>
           </div>
           <div class="p-2.5 rounded-xl bg-sky-950/40 border border-sky-500/30 text-center">
             <div class="text-[10px] text-sky-400 font-bold">متابعة 📞</div>
-            <div id="statFollowCount" class="text-base sm:text-lg font-black text-sky-300 font-['Outfit']">103</div>
-            <div id="statFollowPct" class="text-[10px] text-sky-400/80 font-bold font-mono">35.9%</div>
+            <div id="statFollowCount" class="text-base sm:text-lg font-black text-white font-['Outfit']">103</div>
+            <div id="statFollowPct" class="text-[10px] text-sky-300 font-bold font-mono">35.9%</div>
           </div>
         </div>
 
         <div id="chartStatus" class="min-h-[220px]"></div>
       </div>
 
-      <!-- 2. AREA DISTRIBUTION (WITH BULLETPROOF VISIBLE STATS) -->
+      <!-- 2. AREA DISTRIBUTION -->
       <div class="glass-card rounded-2xl p-3.5 sm:p-5">
         <div class="flex justify-between items-center mb-3">
           <h3 class="font-bold text-xs sm:text-sm md:text-base text-slate-200 flex items-center gap-2">
@@ -296,22 +304,21 @@
           <span class="text-[10px] text-purple-300 font-bold font-mono">أعداد الوحدات</span>
         </div>
 
-        <!-- BULLETPROOF DIRECT HTML STATS BADGES -->
         <div class="grid grid-cols-3 gap-2 mb-3">
-          <div class="p-2.5 rounded-xl bg-[#c5a059]/10 border border-amber-500/30 text-center">
+          <div class="p-2.5 rounded-xl bg-[#c5a059]/15 border border-amber-500/30 text-center">
             <div class="text-[10px] text-amber-300 font-bold">150 - 250م²</div>
-            <div id="statMidCount" class="text-base sm:text-lg font-black text-amber-200 font-['Outfit']">104</div>
-            <div id="statMidPct" class="text-[10px] text-amber-300/80 font-bold font-mono">36.2%</div>
+            <div id="statMidCount" class="text-base sm:text-lg font-black text-white font-['Outfit']">104</div>
+            <div id="statMidPct" class="text-[10px] text-amber-300 font-bold font-mono">36.2%</div>
           </div>
           <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-center">
-            <div class="text-[10px] text-slate-400 font-bold">< 150م²</div>
-            <div id="statSmallCount" class="text-base sm:text-lg font-black text-slate-200 font-['Outfit']">126</div>
-            <div id="statSmallPct" class="text-[10px] text-slate-400 font-bold font-mono">43.9%</div>
+            <div class="text-[10px] text-slate-300 font-bold">< 150م²</div>
+            <div id="statSmallCount" class="text-base sm:text-lg font-black text-white font-['Outfit']">126</div>
+            <div id="statSmallPct" class="text-[10px] text-slate-300 font-bold font-mono">43.9%</div>
           </div>
           <div class="p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/30 text-center">
-            <div class="text-[10px] text-purple-400 font-bold">> 250م²</div>
-            <div id="statLargeCount" class="text-base sm:text-lg font-black text-purple-300 font-['Outfit']">54</div>
-            <div id="statLargePct" class="text-[10px] text-purple-400/80 font-bold font-mono">18.8%</div>
+            <div class="text-[10px] text-purple-300 font-bold">> 250م²</div>
+            <div id="statLargeCount" class="text-base sm:text-lg font-black text-white font-['Outfit']">54</div>
+            <div id="statLargePct" class="text-[10px] text-purple-300 font-bold font-mono">18.8%</div>
           </div>
         </div>
 
@@ -320,32 +327,34 @@
 
     </div>
 
-    <!-- CHARTS ROW 2: LOCATION DEMAND + DELIVERY CONDITION (100% VISIBLE BARS) -->
+    <!-- CHARTS ROW 2: LOCATION DEMAND + DELIVERY CONDITION -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-5 sm:mb-6">
       
-      <!-- TOP LOCATIONS -->
+      <!-- TOP LOCATIONS (WITH PURE CRISP WHITE LABELS) -->
       <div class="glass-card rounded-2xl p-3.5 sm:p-5">
         <div class="flex justify-between items-center mb-3">
           <h3 class="font-bold text-xs sm:text-sm md:text-base text-slate-200 flex items-center gap-2">
             <i class="fa-solid fa-location-dot text-rose-400"></i> أعلى المناطق طلباً (Geo Demand)
           </h3>
-          <span class="text-[10px] text-sky-300 font-bold font-mono">العدد والنسبة</span>
+          <span class="text-[10px] text-sky-300 font-bold font-mono">العدد ظاهر بوضوح</span>
         </div>
-        <div id="locationList" class="space-y-2 mb-2">
-          <!-- Dynamically filled with clear HTML progress bars -->
+        
+        <!-- Live List with Crisp White Numbers -->
+        <div id="locationList" class="space-y-2.5 mb-2">
         </div>
+        
+        <div id="chartLocation" class="min-h-[200px] mt-2"></div>
       </div>
 
-      <!-- DELIVERY CONDITION (100% VISIBLE BARS WITH BOLD NUMBERS & PERCENTAGES) -->
+      <!-- DELIVERY CONDITION (100% VISIBLE BARS WITH BOLD WHITE NUMBERS) -->
       <div class="glass-card rounded-2xl p-3.5 sm:p-5">
         <div class="flex justify-between items-center mb-3">
           <h3 class="font-bold text-xs sm:text-sm md:text-base text-slate-200 flex items-center gap-2">
             <i class="fa-solid fa-trowel-bricks text-amber-400"></i> حالة تسليم الوحدات (Delivery Condition)
           </h3>
-          <span class="text-[10px] text-emerald-400 font-bold font-mono">ظاهر 100% بدون لمس</span>
+          <span class="text-[10px] text-emerald-400 font-bold font-mono">ظاهر بالأبيض والنسب</span>
         </div>
 
-        <!-- 3 BULLETPROOF PERMANENT METRIC BARS -->
         <div class="space-y-3.5 pt-1">
           
           <!-- Semi-Finished -->
@@ -356,10 +365,10 @@
               </span>
               <div class="flex items-center gap-2">
                 <span id="badgeSemiCount" class="text-sm font-black text-white font-['Outfit']">122 وحدة</span>
-                <span id="badgeSemiPct" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[11px] font-black font-mono">42.5%</span>
+                <span id="badgeSemiPct" class="px-2 py-0.5 rounded-md bg-emerald-500/30 text-white text-[11px] font-black font-mono">42.5%</span>
               </div>
             </div>
-            <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div class="w-full h-3.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
               <div id="barSemi" class="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all duration-500" style="width: 42.5%"></div>
             </div>
           </div>
@@ -372,10 +381,10 @@
               </span>
               <div class="flex items-center gap-2">
                 <span id="badgeRedCount" class="text-sm font-black text-white font-['Outfit']">107 وحدة</span>
-                <span id="badgeRedPct" class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[11px] font-black font-mono">37.3%</span>
+                <span id="badgeRedPct" class="px-2 py-0.5 rounded-md bg-amber-500/30 text-white text-[11px] font-black font-mono">37.3%</span>
               </div>
             </div>
-            <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div class="w-full h-3.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
               <div id="barRed" class="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full transition-all duration-500" style="width: 37.3%"></div>
             </div>
           </div>
@@ -388,10 +397,10 @@
               </span>
               <div class="flex items-center gap-2">
                 <span id="badgeFinCount" class="text-sm font-black text-white font-['Outfit']">58 وحدة</span>
-                <span id="badgeFinPct" class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 text-[11px] font-black font-mono">20.2%</span>
+                <span id="badgeFinPct" class="px-2 py-0.5 rounded-md bg-purple-500/30 text-white text-[11px] font-black font-mono">20.2%</span>
               </div>
             </div>
-            <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div class="w-full h-3.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
               <div id="barFin" class="h-full bg-gradient-to-r from-purple-600 to-purple-400 rounded-full transition-all duration-500" style="width: 20.2%"></div>
             </div>
           </div>
@@ -502,7 +511,7 @@
     let currentEndDate = MAX_DATE;
 
     let quickFilterState = null;
-    let chartTimeline, chartStatus, chartArea;
+    let chartTimeline, chartStatus, chartArea, chartLocation;
 
     function initDates() {
       document.getElementById('startDateInput').value = MIN_DATE;
@@ -693,7 +702,7 @@
       document.getElementById('statLargeCount').innerText = large;
       document.getElementById('statLargePct').innerText = ((large / total) * 100).toFixed(1) + '%';
 
-      // 3. Delivery Condition Progress Bars (100% VISIBLE ON PHONES)
+      // 3. Delivery Condition Progress Bars (PURE WHITE TEXT)
       const semi = filteredLeads.filter(l => l.condition && l.condition.includes('نصف')).length;
       const red = filteredLeads.filter(l => l.condition && l.condition.includes('طوب')).length;
       const fin = filteredLeads.filter(l => l.condition && l.condition.includes('متشطبة')).length;
@@ -714,7 +723,7 @@
       document.getElementById('badgeFinPct').innerText = finPct + '%';
       document.getElementById('barFin').style.width = finPct + '%';
 
-      // 4. Location List Progress Bars
+      // 4. Location List Progress Bars (PURE WHITE TEXT)
       const locCounts = {};
       filteredLeads.forEach(l => { locCounts[l.location] = (locCounts[l.location] || 0) + 1; });
       const topLocs = Object.entries(locCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
@@ -724,17 +733,17 @@
       topLocs.forEach(([loc, cnt]) => {
         const p = ((cnt / total) * 100).toFixed(1);
         const item = document.createElement('div');
-        item.className = 'bg-[#0b192c]/80 p-2.5 rounded-xl border border-slate-800';
+        item.className = 'bg-[#0b192c]/90 p-2.5 rounded-xl border border-slate-800';
         item.innerHTML = `
           <div class="flex justify-between items-center mb-1">
-            <span class="text-xs font-bold text-slate-200">${loc}</span>
+            <span class="text-xs font-bold text-white">${loc}</span>
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-black text-white font-['Outfit']">${cnt} ليد</span>
-              <span class="text-[10px] text-sky-400 font-bold font-mono">(${p}%)</span>
+              <span class="text-[10px] text-sky-300 font-bold font-mono">(${p}%)</span>
             </div>
           </div>
-          <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
-            <div class="h-full bg-sky-500 rounded-full" style="width: ${p}%"></div>
+          <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden">
+            <div class="h-full bg-sky-400 rounded-full" style="width: ${p}%"></div>
           </div>
         `;
         locContainer.appendChild(item);
@@ -779,14 +788,14 @@
         colors: ['#10b981', '#f43f5e', '#38bdf8'],
         chart: { type: 'donut', height: isMobile ? 210 : 230, animations: { enabled: true } },
         stroke: { colors: ['#121e31'], width: 2 },
-        dataLabels: { enabled: true, style: { fontSize: '11px', fontFamily: 'Cairo' } },
+        dataLabels: { enabled: true, style: { fontSize: '12px', fontFamily: 'Cairo', fontWeight: 800, colors: ['#ffffff'] } },
         legend: { show: false }
       };
       if (chartStatus) chartStatus.destroy();
       chartStatus = new ApexCharts(document.querySelector("#chartStatus"), sOpts);
       chartStatus.render();
 
-      // 3. Area Column Bar
+      // 3. Area Column Bar (Pure White Labels)
       const aCounts = { '150 - 250م²': 0, '< 150م²': 0, '> 250م²': 0 };
       filteredLeads.forEach(l => {
         if (l.areaCategory && l.areaCategory.includes('150 - 250')) aCounts['150 - 250م²']++;
@@ -795,17 +804,51 @@
       });
       const aOpts = {
         series: [{ name: 'عدد الوحدات', data: Object.values(aCounts) }],
-        xaxis: { categories: Object.keys(aCounts), labels: { style: { colors: '#cbd5e1', fontFamily: 'Cairo', fontSize: isMobile ? '10px' : '11px', fontWeight: 700 } } },
+        xaxis: { categories: Object.keys(aCounts), labels: { style: { colors: '#f1f5f9', fontFamily: 'Cairo', fontSize: isMobile ? '10px' : '11px', fontWeight: 700 } } },
         colors: ['#c5a059'],
         chart: { type: 'bar', height: isMobile ? 210 : 230, toolbar: { show: false } },
         plotOptions: { bar: { borderRadius: 6, columnWidth: '45%' } },
-        dataLabels: { enabled: true, style: { fontSize: '11px', fontFamily: 'Cairo', fontWeight: 800 } },
+        dataLabels: { 
+          enabled: true, 
+          style: { fontSize: '12px', fontFamily: 'Cairo', fontWeight: 900, colors: ['#ffffff'] }
+        },
         grid: { borderColor: '#1e293b' },
         yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '10px' } } }
       };
       if (chartArea) chartArea.destroy();
       chartArea = new ApexCharts(document.querySelector("#chartArea"), aOpts);
       chartArea.render();
+
+      // 4. Location Horizontal Bar (100% PURE WHITE TEXT INSIDE BARS)
+      const locCounts = {};
+      filteredLeads.forEach(l => { locCounts[l.location] = (locCounts[l.location] || 0) + 1; });
+      const topLocs = Object.entries(locCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+      const lOpts = {
+        series: [{ name: 'عدد الليدات', data: topLocs.map(x => x[1]) }],
+        xaxis: { categories: topLocs.map(x => x[0]), labels: { style: { colors: '#94a3b8', fontSize: '10px' } } },
+        colors: ['#0284c7'],
+        chart: { type: 'bar', height: isMobile ? 200 : 220, toolbar: { show: false } },
+        plotOptions: {
+          bar: {
+            horizontal: true,
+            borderRadius: 6,
+            barHeight: '60%',
+            dataLabels: { position: 'inside' }
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: (val) => val + ' ليد',
+          textAnchor: 'middle',
+          style: { fontSize: '12px', fontFamily: 'Cairo', fontWeight: 900, colors: ['#ffffff'] },
+          dropShadow: { enabled: true, top: 1, left: 1, blur: 2, opacity: 0.9 }
+        },
+        grid: { borderColor: '#1e293b' },
+        yaxis: { labels: { style: { colors: '#f1f5f9', fontFamily: 'Cairo', fontSize: '11px', fontWeight: 700 } } }
+      };
+      if (chartLocation) chartLocation.destroy();
+      chartLocation = new ApexCharts(document.querySelector("#chartLocation"), lOpts);
+      chartLocation.render();
     }
 
     function renderTable() {
