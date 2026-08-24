@@ -89,7 +89,7 @@
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> مؤمن ومشفر
             </span>
           </div>
-          <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 font-semibold">لوحة تحكم ذكاء الأعمال والفلترة الزمنية — Sheets 25, 26, 27</p>
+          <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 font-semibold">لوحة تحكم ذكاء الأعمال وإدارة المبيعات — Sheets 25, 26, 27</p>
         </div>
       </div>
 
@@ -110,7 +110,7 @@
       </div>
     </header>
 
-    <!-- CLEAN DATE FILTER BAR (NO DRAG SLIDER - CRISP & DIRECT) -->
+    <!-- CLEAN DATE FILTER BAR -->
     <div class="glass-card rounded-2xl p-4 sm:p-5 mb-5 border-amber-500/30">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3.5 gap-2.5">
         <div class="flex items-center gap-2 text-[#c5a059] font-bold text-xs sm:text-sm">
@@ -223,7 +223,7 @@
       </div>
 
       <div class="glass-card rounded-2xl p-3.5 sm:p-4 border-l-4 border-l-emerald-500 border-emerald-500/30">
-        <div class="text-slate-400 text-[11px] sm:text-xs font-bold mb-1 flex justify-between">المؤهلين <i class="fa-solid fa-circle-check text-emerald-400"></i></div>
+        <div class="text-slate-400 text-[11px] sm:text-xs font-bold mb-1 flex justify-between">المؤهلين (Qualified) <i class="fa-solid fa-circle-check text-emerald-400"></i></div>
         <div id="kpiQualified" class="text-xl sm:text-2xl md:text-3xl font-black font-['Outfit'] text-emerald-400">87</div>
         <div id="kpiQualRate" class="text-[10px] text-emerald-300 font-bold mt-0.5">نسبة التأهيل: 30.3%</div>
       </div>
@@ -241,9 +241,9 @@
       </div>
 
       <div class="glass-card rounded-2xl p-3.5 sm:p-4 border-l-4 border-l-cyan-500 border-cyan-500/30">
-        <div class="text-slate-400 text-[11px] sm:text-xs font-bold mb-1 flex justify-between">متابعات ومقايسات <i class="fa-brands fa-whatsapp text-cyan-400"></i></div>
+        <div class="text-slate-400 text-[11px] sm:text-xs font-bold mb-1 flex justify-between">قيد المتابعة / لم يرد <i class="fa-brands fa-whatsapp text-cyan-400"></i></div>
         <div id="kpiFollowup" class="text-xl sm:text-2xl md:text-3xl font-black font-['Outfit'] text-cyan-300">103</div>
-        <div class="text-[10px] text-cyan-400 font-bold mt-0.5">مرحلة المقايسة</div>
+        <div class="text-[10px] text-cyan-400 font-bold mt-0.5">مكالمات معلقة ومتابعات</div>
       </div>
 
       <div class="glass-card rounded-2xl p-3.5 sm:p-4 border-l-4 border-l-rose-500 border-rose-500/30">
@@ -473,11 +473,9 @@
       const ow = document.getElementById('ownerFilter').value;
 
       filteredLeads = ALL_LEADS.filter(l => {
-        // Quick Toggles
         if (quickFilterState === 'QUALIFIED' && l.status !== 'Qualified') return false;
         if (quickFilterState === 'GOLDEN' && (!l.areaCategory || !l.areaCategory.includes('150 - 250'))) return false;
 
-        // Date Filter
         if (l.date) {
           if (l.date < currentStartDate || l.date > currentEndDate) return false;
         }
