@@ -33,11 +33,6 @@
     input[type=range] {
       accent-color: #c5a059;
     }
-    input[type=date]::-webkit-calendar-picker-indicator {
-      filter: invert(0.85);
-      cursor: pointer;
-    }
-    /* Mobile Touch Optimizations */
     @media (max-width: 640px) {
       .glass-card {
         padding: 1rem !important;
@@ -48,7 +43,7 @@
 </head>
 <body class="p-3 sm:p-4 md:p-6 lg:p-8">
 
-  <!-- TOP HEADER (FULLY RESPONSIVE) -->
+  <!-- TOP HEADER -->
   <header class="flex flex-col md:flex-row items-center justify-between pb-5 mb-5 border-b border-slate-800 gap-4">
     <div class="flex items-center gap-3.5 w-full md:w-auto">
       <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-[#c5a059] to-amber-200 flex-shrink-0 flex items-center justify-center shadow-lg shadow-amber-900/30">
@@ -59,16 +54,16 @@
           <h1 class="text-xl sm:text-2xl md:text-3xl font-black gold-gradient">أملاك ديزاين</h1>
           <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-[#c5a059] text-[11px] font-bold border border-amber-500/30">لوحة التحكم التنفيذية</span>
         </div>
-        <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 font-semibold">تحليل الليدات والمبيعات — ملائم للهاتف والكمبيوتر</p>
+        <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 font-semibold">تحليل أداء الحملات والليدات — Sheets 25, 26, 27</p>
       </div>
     </div>
 
-    <!-- Actions & Toggles -->
+    <!-- Actions & Quick Toggles -->
     <div class="flex items-center gap-2 sm:gap-3 flex-wrap w-full md:w-auto justify-start md:justify-end">
-      <button onclick="toggleQuickFilter('QUALIFIED')" id="btnQuickQual" class="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white transition font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm">
+      <button onclick="toggleQuickFilter('QUALIFIED')" id="btnQuickQual" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white transition font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm">
         <i class="fa-solid fa-star text-amber-400"></i> المؤهلين (87)
       </button>
-      <button onclick="toggleQuickFilter('GOLDEN')" id="btnQuickGolden" class="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-[#c5a059] hover:text-[#0b192c] transition font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm">
+      <button onclick="toggleQuickFilter('GOLDEN')" id="btnQuickGolden" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-[#c5a059] hover:text-[#0b192c] transition font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm">
         <i class="fa-solid fa-gem text-amber-400"></i> الشريحة الذهبية
       </button>
       <button onclick="exportToCSV()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white hover:bg-slate-700 transition font-bold text-xs flex items-center justify-center gap-2 shadow-md">
@@ -77,47 +72,14 @@
     </div>
   </header>
 
-  <!-- TIMELINE & DATE SLIDER (RESPONSIVE) -->
-  <div class="glass-card rounded-2xl p-4 sm:p-5 mb-5 border-amber-500/30">
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3.5 gap-2.5">
-      <div class="flex items-center gap-2 text-[#c5a059] font-bold text-xs sm:text-sm">
-        <i class="fa-solid fa-calendar-days text-sm sm:text-base"></i> سلايدر وفلتر النطاق الزمني (Timeline Slider)
-      </div>
-      <div class="grid grid-cols-4 sm:flex items-center gap-1.5 w-full sm:w-auto">
-        <button onclick="setDatePreset('ALL')" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[10px] sm:text-[11px] text-slate-300 font-semibold text-center transition">الكل</button>
-        <button onclick="setDatePreset('JULY')" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[10px] sm:text-[11px] text-slate-300 font-semibold text-center transition">يوليو</button>
-        <button onclick="setDatePreset('AUG')" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[10px] sm:text-[11px] text-slate-300 font-semibold text-center transition">أغسطس</button>
-        <button onclick="setDatePreset('LAST7')" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[10px] sm:text-[11px] text-slate-300 font-semibold text-center transition">7 أيام</button>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-4 items-center">
-      <div class="lg:col-span-3">
-        <label class="block text-[11px] sm:text-xs text-slate-400 mb-1 font-bold">من تاريخ:</label>
-        <input type="date" id="startDateInput" onchange="handleDateInputChange()" class="w-full px-3 py-2 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-white font-semibold focus:outline-none focus:border-[#c5a059]">
-      </div>
-      <div class="lg:col-span-3">
-        <label class="block text-[11px] sm:text-xs text-slate-400 mb-1 font-bold">إلى تاريخ:</label>
-        <input type="date" id="endDateInput" onchange="handleDateInputChange()" class="w-full px-3 py-2 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-white font-semibold focus:outline-none focus:border-[#c5a059]">
-      </div>
-      <div class="sm:col-span-2 lg:col-span-6 bg-[#0b192c]/80 p-3 rounded-xl border border-slate-800">
-        <div class="flex justify-between text-[11px] sm:text-xs mb-1.5 font-bold">
-          <span class="text-slate-400 flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-[#c5a059]"></i> سلايدر تدرج التاريخ:</span>
-          <span id="dateSliderDisplay" class="text-amber-300 font-mono font-black text-[11px] sm:text-xs">2026-07-23 إلى 2026-08-24</span>
-        </div>
-        <input type="range" id="dateRangeSlider" min="0" max="100" value="100" oninput="handleDateSlider(this.value)" class="w-full h-2 bg-slate-800 rounded-lg cursor-pointer">
-      </div>
-    </div>
-  </div>
-
-  <!-- MULTI-DIMENSIONAL ATTRIBUTE SLICERS (RESPONSIVE) -->
+  <!-- MULTI-DIMENSIONAL ATTRIBUTE SLICERS & AREA SLIDER -->
   <div class="glass-card rounded-2xl p-4 sm:p-5 mb-6">
     <div class="flex items-center justify-between mb-3.5 flex-wrap gap-2">
       <div class="text-[#c5a059] font-bold text-xs sm:text-sm flex items-center gap-2">
-        <i class="fa-solid fa-sliders text-amber-400"></i> فلاتر الخصائص وسلايدر المساحة (Filters & Slicers)
+        <i class="fa-solid fa-sliders text-amber-400"></i> فلاتر الخصائص وسلايدر المساحة التفاعلية (Marketing Slicers)
       </div>
       <button onclick="resetFilters()" class="text-[11px] sm:text-xs text-slate-400 hover:text-[#c5a059] font-bold flex items-center gap-1">
-        <i class="fa-solid fa-rotate-left"></i> إعادة ضبط
+        <i class="fa-solid fa-rotate-left"></i> إعادة ضبط الفلاتر
       </button>
     </div>
 
@@ -220,18 +182,7 @@
     </div>
   </div>
 
-  <!-- TIMELINE TREND CHART -->
-  <div class="glass-card rounded-2xl p-4 sm:p-5 mb-6">
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="font-bold text-xs sm:text-sm md:text-base text-slate-200 flex items-center gap-2">
-        <i class="fa-solid fa-chart-line text-emerald-400"></i> مخطط التدفق الزمني اليومي للعملاء (Daily Lead Volume Trend)
-      </h3>
-      <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-[#0b192c] text-emerald-400 border border-slate-800 font-bold font-mono">Live Inflow</span>
-    </div>
-    <div id="chartTimeline" class="min-h-[210px]"></div>
-  </div>
-
-  <!-- CHARTS ROW 1 -->
+  <!-- CHARTS ROW 1: STATUS DONUT + AREA DISTRIBUTION -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
     <div class="glass-card rounded-2xl p-4 sm:p-5">
       <h3 class="font-bold text-xs sm:text-sm md:text-base text-slate-200 mb-3 flex items-center gap-2">
@@ -248,7 +199,7 @@
     </div>
   </div>
 
-  <!-- CHARTS ROW 2 -->
+  <!-- CHARTS ROW 2: LOCATION DEMAND + DELIVERY CONDITION -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
     <div class="glass-card rounded-2xl p-4 sm:p-5">
       <h3 class="font-bold text-xs sm:text-sm md:text-base text-slate-200 mb-3 flex items-center gap-2">
@@ -265,14 +216,14 @@
     </div>
   </div>
 
-  <!-- DATA TABLE (WITH HORIZONTAL SCROLL & TOUCH FRIENDLY ROWS) -->
+  <!-- DATA TABLE -->
   <div class="glass-card rounded-2xl p-4 sm:p-5 mb-6">
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3.5 gap-3">
       <div>
         <h3 class="font-bold text-sm sm:text-base text-[#c5a059] flex items-center gap-2">
           <i class="fa-solid fa-table-list"></i> جدول بيانات العملاء المباشر مع محادثة واتساب
         </h3>
-        <p class="text-[11px] text-slate-400 font-semibold">اسحب الجدول لليمين واليسار لاستعراض كل الأعمدة على الهاتف</p>
+        <p class="text-[11px] text-slate-400 font-semibold">اسحب الجدول لليمين واليسار لاستعراض كل الأعمدة</p>
       </div>
       <div class="relative w-full sm:w-72">
         <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
@@ -314,74 +265,8 @@
     let filteredLeads = [...ALL_LEADS];
     let maxArea = 500;
 
-    const datesOnly = ALL_LEADS.map(l => l.date).filter(d => d).sort();
-    const MIN_DATE = datesOnly[0] || '2026-07-23';
-    const MAX_DATE = datesOnly[datesOnly.length - 1] || '2026-08-24';
-
-    let currentStartDate = MIN_DATE;
-    let currentEndDate = MAX_DATE;
-
     let quickFilterState = null;
-
-    let chartTimeline, chartStatus, chartArea, chartLocation, chartCondition;
-
-    function initDates() {
-      document.getElementById('startDateInput').value = MIN_DATE;
-      document.getElementById('endDateInput').value = MAX_DATE;
-      document.getElementById('startDateInput').min = MIN_DATE;
-      document.getElementById('startDateInput').max = MAX_DATE;
-      document.getElementById('endDateInput').min = MIN_DATE;
-      document.getElementById('endDateInput').max = MAX_DATE;
-      updateDateSliderLabel();
-    }
-
-    function updateDateSliderLabel() {
-      document.getElementById('dateSliderDisplay').innerText = currentStartDate + ' إلى ' + currentEndDate;
-    }
-
-    function handleDateInputChange() {
-      currentStartDate = document.getElementById('startDateInput').value || MIN_DATE;
-      currentEndDate = document.getElementById('endDateInput').value || MAX_DATE;
-      updateDateSliderLabel();
-      applyFilters();
-    }
-
-    function handleDateSlider(sliderPct) {
-      const startMs = new Date(MIN_DATE).getTime();
-      const endMs = new Date(MAX_DATE).getTime();
-      const totalSpan = endMs - startMs;
-      
-      const newEndMs = startMs + (totalSpan * (sliderPct / 100));
-      const newEndDate = new Date(newEndMs).toISOString().slice(0, 10);
-      
-      currentEndDate = newEndDate;
-      document.getElementById('endDateInput').value = newEndDate;
-      updateDateSliderLabel();
-      applyFilters();
-    }
-
-    function setDatePreset(preset) {
-      if (preset === 'ALL') {
-        currentStartDate = MIN_DATE;
-        currentEndDate = MAX_DATE;
-      } else if (preset === 'JULY') {
-        currentStartDate = '2026-07-01';
-        currentEndDate = '2026-07-31';
-      } else if (preset === 'AUG') {
-        currentStartDate = '2026-08-01';
-        currentEndDate = '2026-08-31';
-      } else if (preset === 'LAST7') {
-        const d = new Date(MAX_DATE);
-        d.setDate(d.getDate() - 7);
-        currentStartDate = d.toISOString().slice(0, 10);
-        currentEndDate = MAX_DATE;
-      }
-      document.getElementById('startDateInput').value = currentStartDate;
-      document.getElementById('endDateInput').value = currentEndDate;
-      document.getElementById('dateRangeSlider').value = 100;
-      updateDateSliderLabel();
-      applyFilters();
-    }
+    let chartStatus, chartArea, chartLocation, chartCondition;
 
     function handleAreaSlider(val) {
       maxArea = parseInt(val);
@@ -418,9 +303,6 @@
         if (quickFilterState === 'QUALIFIED' && l.status !== 'Qualified') return false;
         if (quickFilterState === 'GOLDEN' && (!l.areaCategory || !l.areaCategory.includes('150 - 250'))) return false;
 
-        if (l.date) {
-          if (l.date < currentStartDate || l.date > currentEndDate) return false;
-        }
         if (st !== 'ALL' && l.status !== st) return false;
         if (ad !== 'ALL' && !l.adName.toLowerCase().includes(ad.toLowerCase())) return false;
         if (co === 'KSA' && !l.country.includes('KSA')) return false;
@@ -448,7 +330,8 @@
       quickFilterState = null;
       document.getElementById('btnQuickQual').classList.remove('bg-emerald-600', 'text-white');
       document.getElementById('btnQuickGolden').classList.remove('bg-[#c5a059]', 'text-[#0b192c]');
-      setDatePreset('ALL');
+      filteredLeads = [...ALL_LEADS];
+      renderAll();
     }
 
     function handleSearch() {
@@ -491,28 +374,7 @@
     function renderCharts() {
       const isMobile = window.innerWidth < 640;
 
-      // 1. Timeline Chart
-      const dateMap = {};
-      filteredLeads.forEach(l => {
-        if (l.date) dateMap[l.date] = (dateMap[l.date] || 0) + 1;
-      });
-      const sortedDates = Object.keys(dateMap).sort();
-      const timelineOpts = {
-        series: [{ name: 'الليدات اليومية', data: sortedDates.map(d => dateMap[d]) }],
-        xaxis: { categories: sortedDates, labels: { rotate: isMobile ? -45 : 0, style: { colors: '#94a3b8', fontSize: isMobile ? '8px' : '10px', fontFamily: 'Cairo' } } },
-        colors: ['#10b981'],
-        chart: { type: 'area', height: isMobile ? 180 : 220, toolbar: { show: false }, animations: { enabled: true } },
-        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.05, stops: [0, 90, 100] } },
-        stroke: { curve: 'smooth', width: 2.5 },
-        dataLabels: { enabled: !isMobile, style: { fontSize: '9px', fontFamily: 'Cairo' } },
-        grid: { borderColor: '#1e293b' },
-        yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '10px' } } }
-      };
-      if (chartTimeline) chartTimeline.destroy();
-      chartTimeline = new ApexCharts(document.querySelector("#chartTimeline"), timelineOpts);
-      chartTimeline.render();
-
-      // 2. Status Donut
+      // 1. Status Donut
       const sCounts = { 'Qualified': 0, 'Not Qualified': 0, 'No Answer / Other': 0 };
       filteredLeads.forEach(l => {
         if (l.status === 'Qualified') sCounts['Qualified']++;
@@ -531,7 +393,7 @@
       chartStatus = new ApexCharts(document.querySelector("#chartStatus"), sOpts);
       chartStatus.render();
 
-      // 3. Area Bar
+      // 2. Area Bar
       const aCounts = { '150-250م²': 0, '< 150م²': 0, '> 250م²': 0 };
       filteredLeads.forEach(l => {
         if (l.areaCategory && l.areaCategory.includes('150 - 250')) aCounts['150-250م²']++;
@@ -551,7 +413,7 @@
       chartArea = new ApexCharts(document.querySelector("#chartArea"), aOpts);
       chartArea.render();
 
-      // 4. Location Horizontal Bar
+      // 3. Location Horizontal Bar
       const lCounts = {};
       filteredLeads.forEach(l => { lCounts[l.location] = (lCounts[l.location] || 0) + 1; });
       const topL = Object.entries(lCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
@@ -568,7 +430,7 @@
       chartLocation = new ApexCharts(document.querySelector("#chartLocation"), lOpts);
       chartLocation.render();
 
-      // 5. Condition Polar Area
+      // 4. Condition Polar Area
       const cCounts = { 'نصف تشطيب': 0, 'طوب أحمر': 0, 'متشطبة': 0 };
       filteredLeads.forEach(l => {
         if (l.condition && l.condition.includes('نصف')) cCounts['نصف تشطيب']++;
@@ -638,7 +500,6 @@
     }
 
     window.onload = function() {
-      initDates();
       renderAll();
     };
 
