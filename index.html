@@ -131,7 +131,7 @@
       </div>
     </header>
 
-    <!-- DATE FILTER BAR (STARTS FROM 2026-07-22) -->
+    <!-- DATE FILTER BAR -->
     <div class="glass-card rounded-2xl p-4 sm:p-5 mb-5 border-amber-500/30">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3.5 gap-2.5">
         <div class="flex items-center gap-2 text-[#c5a059] font-bold text-xs sm:text-sm">
@@ -221,6 +221,7 @@
             <option value="ALL">All Agents</option>
             <option value="Mariam">Mariam (مريم)</option>
             <option value="Shahd">Shahd (شهد)</option>
+            <option value="Unassigned">Unassigned (غير معين)</option>
           </select>
         </div>
 
@@ -536,19 +537,19 @@
             if (!rows || rows.length <= 1) continue;
 
             const rawHeaders = rows[0];
-            const headers = rawHeaders.map(h => cleanText(h).split(/\s+/)[0].toLowerCase());
+            const headers = rawHeaders.map(h => cleanText(h).toLowerCase().trim());
 
-            const idIdx = headers.findIndex(h => h === 'id');
-            const createdIdx = headers.findIndex(h => h.includes('created'));
-            const adIdx = headers.findIndex(h => h.includes('ad_name') || h === 'ad_name');
-            const condIdx = headers.findIndex(h => h.includes('condition') || h.includes('حالة'));
+            const idIdx = headers.findIndex(h => h === 'id' || h.startsWith('id'));
+            const createdIdx = headers.findIndex(h => h.includes('created') || h.includes('time') || h.includes('date'));
+            const adIdx = headers.findIndex(h => h.includes('ad_name') || h === 'ad');
+            const condIdx = headers.findIndex(h => h.includes('condition') || h.includes('حالة_الوحدة') || h.includes('حالة'));
             const areaIdx = headers.findIndex(h => h.includes('area') || h.includes('مساحة'));
-            const locIdx = headers.findIndex(h => h.includes('location') || h.includes('موقع') || h.includes('government') || h.includes('محافظة'));
-            const nameIdx = headers.findIndex(h => h.includes('name') && !h.includes('ad') && !h.includes('campaign') && !h.includes('form'));
-            const phoneIdx = headers.findIndex(h => h.includes('phone') || h.includes('هاتف'));
-            const statusIdx = headers.findIndex(h => h.includes('status') || h.includes('حالة_العميل'));
-            const notesIdx = headers.findIndex(h => h === 'note' || h.includes('ملاحظ'));
-            const ownerIdx = headers.findIndex(h => h.includes('owner') || h.includes('مسؤول'));
+            const locIdx = headers.findIndex(h => h.includes('unit_location') || h.includes('property_location') || h.includes('location') || h.includes('موقع') || h.includes('government') || h.includes('محافظة'));
+            const nameIdx = headers.findIndex(h => h.includes('full_name') || (h.includes('name') && !h.includes('ad') && !h.includes('campaign') && !h.includes('form') && !h.includes('set') && !h.includes('owner')));
+            const phoneIdx = headers.findIndex(h => h.includes('phone') || h.includes('هاتف') || h.includes('mobile'));
+            const statusIdx = headers.findIndex(h => h.includes('lead_status') || h.includes('status') || h.includes('حالة_العميل'));
+            const notesIdx = headers.findIndex(h => h === 'note' || h.includes('notes') || h.includes('note') || h.includes('ملاحظ'));
+            const ownerIdx = headers.findIndex(h => h.includes('owner') || h.includes('agent') || h.includes('sales') || h.includes('مسؤول') || h.includes('assign'));
 
             rows.slice(1).forEach((r) => {
               if (r.every(c => !c || c.trim() === '')) return;
@@ -569,7 +570,7 @@
               const key = id || phone;
               if (key) {
                 if (liveMap.has(key)) {
-                  // Merge live updates without dropping baseline history
+                  // Merge live updates with 100% accurate owner mapping
                   const existing = liveMap.get(key);
                   if (status && status !== 'No Answer') existing.status = status;
                   if (notes && notes !== '-') existing.notes = notes;
@@ -768,6 +769,7 @@
         (l.phone && l.phone.toLowerCase().includes(q)) ||
         (l.location && l.location.toLowerCase().includes(q)) ||
         (l.adName && l.adName.toLowerCase().includes(q)) ||
+        (l.owner && l.owner.toLowerCase().includes(q)) ||
         (l.notes && l.notes.toLowerCase().includes(q))
       );
       renderAll();
@@ -965,13 +967,22 @@
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       tbody.innerHTML = '';
-      filteredLeads.slice(0, 100).forEach((l, i) => {
+      filteredLeads.slice(0, 150).forEach((l, i) => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-800/50 active:bg-slate-800 transition border-b border-slate-800/60';
         let badge = '<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">No Answer</span>';
         if (l.status === 'Qualified') badge = '<span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-black font-mono">Qualified ✅</span>';
         if (l.status === 'Not Qualified') badge = '<span class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 text-[10px] font-bold font-mono">Not Qual ❌</span>';
         if (l.status === 'CREATED') badge = '<span class="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 text-[10px] font-bold font-mono">CREATED 🆕</span>';
+
+        let agentBadge = '<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-medium text-[10px]">Unassigned</span>';
+        if (l.owner === 'Mariam' || l.owner.includes('Mariam') || l.owner.includes('مريم')) {
+          agentBadge = '<span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold text-[11px]">Mariam</span>';
+        } else if (l.owner === 'Shahd' || l.owner.includes('Shahd') || l.owner.includes('شهد')) {
+          agentBadge = '<span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-[11px]">Shahd</span>';
+        } else if (l.owner && l.owner !== 'Unassigned') {
+          agentBadge = `<span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold text-[11px]">${l.owner}</span>`;
+        }
 
         const cleanP = l.phone.replace(/[^\d+]/g, '');
         const wa = 'https://wa.me/' + cleanP.replace('+', '');
@@ -987,8 +998,8 @@
           <td class="p-2.5 sm:p-3 text-slate-300 text-[11px]">${l.location}</td>
           <td class="p-2.5 sm:p-3 text-slate-300 text-[10px] sm:text-[11px] font-semibold max-w-[120px] truncate font-mono" title="${l.adName}">${l.adName}</td>
           <td class="p-2.5 sm:p-3">${badge}</td>
-          <td class="p-2.5 sm:p-3 font-bold text-slate-300 text-[11px]">${l.owner}</td>
-          <td class="p-2.5 sm:p-3 text-slate-400 max-w-xs truncate font-medium text-[11px]" title="${l.notes}">${l.notes}</td>
+          <td class="p-2.5 sm:p-3">${agentBadge}</td>
+          <td class="p-2.5 sm:p-3 text-slate-300 max-w-xs truncate font-medium text-[11px]" title="${l.notes}">${l.notes}</td>
           <td class="p-2.5 sm:p-3 text-center">
             <a href="${wa}" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white active:scale-90 transition shadow-sm" title="Direct WhatsApp Chat">
               <i class="fa-brands fa-whatsapp text-base"></i>
