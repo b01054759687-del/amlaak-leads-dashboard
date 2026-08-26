@@ -334,13 +334,13 @@
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3.5 gap-3">
         <div>
           <h3 class="font-bold text-sm sm:text-base text-[#c5a059] flex items-center gap-2">
-            <i class="fa-solid fa-table-list"></i> Live Leads CRM Table (جدول العملاء المباشر)
+            <i class="fa-solid fa-table-list"></i> Live Leads CRM Table (جدول العملاء المباشر - مرتب بالأحدث)
           </h3>
-          <p class="text-[11px] text-slate-400 font-semibold">مفلتر لحظياً وفق التاريخ، المساحة، والخصائص المحددة</p>
+          <p class="text-[11px] text-slate-400 font-semibold">مفلتر لحظياً وفق التاريخ، المساحة، ومسؤول المبيعات</p>
         </div>
         <div class="relative w-full sm:w-72">
           <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
-          <input type="text" id="tableSearch" onkeyup="handleSearch()" placeholder="Search Name, Phone, Location..." class="w-full pr-8 pl-3 py-2 rounded-xl bg-[#0b192c] border border-slate-700 text-xs focus:outline-none focus:border-[#c5a059] text-white font-semibold">
+          <input type="text" id="tableSearch" onkeyup="handleSearch()" placeholder="Search Name, Phone, Location, Agent..." class="w-full pr-8 pl-3 py-2 rounded-xl bg-[#0b192c] border border-slate-700 text-xs focus:outline-none focus:border-[#c5a059] text-white font-semibold">
         </div>
       </div>
 
@@ -736,7 +736,7 @@
         if (co === 'KSA' && !l.country.includes('KSA')) return false;
         if (co === 'Egypt' && !l.country.includes('Egypt')) return false;
         if (cd !== 'ALL' && !l.condition.includes(cd)) return false;
-        if (ow !== 'ALL' && !l.owner.includes(ow)) return false;
+        if (ow !== 'ALL' && !l.owner.toLowerCase().includes(ow.toLowerCase())) return false;
         if (l.areaNum > 0 && l.areaNum > maxArea) return false;
 
         return true;
@@ -967,7 +967,15 @@
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       tbody.innerHTML = '';
-      filteredLeads.slice(0, 150).forEach((l, i) => {
+      
+      // Sort newest leads first so team sees recent entries immediately
+      const sortedForTable = [...filteredLeads].sort((a, b) => {
+        const da = a.rawCreated || a.date || '';
+        const db = b.rawCreated || b.date || '';
+        return db.localeCompare(da);
+      });
+
+      sortedForTable.slice(0, 150).forEach((l, i) => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-800/50 active:bg-slate-800 transition border-b border-slate-800/60';
         let badge = '<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">No Answer</span>';
@@ -976,9 +984,9 @@
         if (l.status === 'CREATED') badge = '<span class="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 text-[10px] font-bold font-mono">CREATED 🆕</span>';
 
         let agentBadge = '<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-medium text-[10px]">Unassigned</span>';
-        if (l.owner === 'Mariam' || l.owner.includes('Mariam') || l.owner.includes('مريم')) {
+        if (l.owner.toLowerCase().includes('mariam') || l.owner.includes('مريم')) {
           agentBadge = '<span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold text-[11px]">Mariam</span>';
-        } else if (l.owner === 'Shahd' || l.owner.includes('Shahd') || l.owner.includes('شهد')) {
+        } else if (l.owner.toLowerCase().includes('shahd') || l.owner.includes('شهد')) {
           agentBadge = '<span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-[11px]">Shahd</span>';
         } else if (l.owner && l.owner !== 'Unassigned') {
           agentBadge = `<span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold text-[11px]">${l.owner}</span>`;
