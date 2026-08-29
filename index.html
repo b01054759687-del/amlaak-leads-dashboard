@@ -131,11 +131,11 @@
       </div>
     </header>
 
-    <!-- DATE FILTER BAR -->
+    <!-- DATE FILTER BAR (DYNAMIC END DATE DEFAULTS TO TODAY) -->
     <div class="glass-card rounded-2xl p-4 sm:p-5 mb-5 border-amber-500/30">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3.5 gap-2.5">
         <div class="flex items-center gap-2 text-[#c5a059] font-bold text-xs sm:text-sm">
-          <i class="fa-solid fa-calendar-days text-sm"></i> Date Range (الفترة الزمنية من 22 يوليو 2026 وحتى الآن)
+          <i class="fa-solid fa-calendar-days text-sm"></i> Date Range (الفترة الزمنية من 22 يوليو 2026 وحتى تاريخ اليوم)
         </div>
         <div class="grid grid-cols-4 sm:flex items-center gap-1.5 w-full sm:w-auto">
           <button onclick="setDatePreset('ALL')" id="btnDateAll" class="px-3 py-1.5 rounded-xl bg-[#c5a059] text-[#0b192c] font-black text-[11px] text-center transition shadow-sm">All (الكل)</button>
@@ -151,12 +151,12 @@
           <input type="date" id="startDateInput" onchange="handleDateChange()" class="w-full px-3 py-2 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-white font-semibold focus:outline-none focus:border-[#c5a059]">
         </div>
         <div>
-          <label class="block text-[11px] sm:text-xs text-slate-400 mb-1 font-bold">إلى تاريخ (End Date):</label>
+          <label class="block text-[11px] sm:text-xs text-slate-400 mb-1 font-bold">إلى تاريخ (End Date - اليوم تلقائياً):</label>
           <input type="date" id="endDateInput" onchange="handleDateChange()" class="w-full px-3 py-2 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-white font-semibold focus:outline-none focus:border-[#c5a059]">
         </div>
         <div>
           <button onclick="setDatePreset('ALL')" class="w-full py-2 rounded-xl bg-slate-800 border border-slate-700 hover:border-[#c5a059] text-xs text-amber-300 font-bold flex items-center justify-center gap-1.5 transition">
-            <i class="fa-solid fa-clock-rotate-left"></i> عرض كامل النطاق (Reset Date)
+            <i class="fa-solid fa-clock-rotate-left"></i> عرض كامل النطاق حتى اليوم (Reset Date)
           </button>
         </div>
       </div>
@@ -421,13 +421,21 @@
       document.getElementById('pinInput').value = '';
     }
 
+    function getTodayISO() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
     let ALL_LEADS = [...BASELINE_LEADS];
     let filteredLeads = [];
     let maxArea = 500;
     let MIN_DATE = '2026-07-22';
-    let MAX_DATE = '2026-08-31';
+    let MAX_DATE = getTodayISO();
     let currentStartDate = MIN_DATE;
-    let currentEndDate = MAX_DATE;
+    let currentEndDate = getTodayISO();
 
     let quickFilterState = null;
     let chartTimeline, chartStatus, chartArea, chartLocation, chartCondition;
@@ -584,7 +592,7 @@
                     name: name || 'عميل',
                     phone: phone || '-',
                     country,
-                    date: dateFormatted || new Date().toISOString().slice(0, 10),
+                    date: dateFormatted || getTodayISO(),
                     rawCreated,
                     areaNum: areaInfo.areaNum,
                     areaCategory: areaInfo.areaCat,
@@ -605,14 +613,22 @@
 
         ALL_LEADS = Array.from(liveMap.values()).sort((a, b) => (a.date > b.date ? 1 : -1));
         
+        const todayISO = getTodayISO();
         const datesOnly = ALL_LEADS.map(l => l.date).filter(d => d).sort();
         MIN_DATE = datesOnly[0] || '2026-07-22';
-        MAX_DATE = datesOnly[datesOnly.length - 1] || '2026-08-31';
+        const latestLeadDate = datesOnly.length > 0 ? datesOnly[datesOnly.length - 1] : todayISO;
+        MAX_DATE = latestLeadDate > todayISO ? latestLeadDate : todayISO;
 
         document.getElementById('startDateInput').min = MIN_DATE;
-        document.getElementById('startDateInput').max = MAX_DATE;
+        document.getElementById('startDateInput').max = '2099-12-31';
         document.getElementById('endDateInput').min = MIN_DATE;
-        document.getElementById('endDateInput').max = MAX_DATE;
+        document.getElementById('endDateInput').max = '2099-12-31';
+
+        // Keep currentEndDate aligned with today's date if viewing full range
+        if (!currentEndDate || currentEndDate < todayISO) {
+          currentEndDate = todayISO;
+          document.getElementById('endDateInput').value = todayISO;
+        }
 
         applyFilters();
 
@@ -635,24 +651,26 @@
     }, 60000);
 
     function initDates() {
+      const todayISO = getTodayISO();
       const datesOnly = ALL_LEADS.map(l => l.date).filter(d => d).sort();
       MIN_DATE = datesOnly[0] || '2026-07-22';
-      MAX_DATE = datesOnly[datesOnly.length - 1] || '2026-08-31';
+      const latestLeadDate = datesOnly.length > 0 ? datesOnly[datesOnly.length - 1] : todayISO;
+      MAX_DATE = latestLeadDate > todayISO ? latestLeadDate : todayISO;
 
       currentStartDate = MIN_DATE;
-      currentEndDate = MAX_DATE;
+      currentEndDate = todayISO; // Dynamically defaults to today's date every time opened!
 
       document.getElementById('startDateInput').value = MIN_DATE;
-      document.getElementById('endDateInput').value = MAX_DATE;
+      document.getElementById('endDateInput').value = todayISO;
       document.getElementById('startDateInput').min = MIN_DATE;
-      document.getElementById('startDateInput').max = MAX_DATE;
+      document.getElementById('startDateInput').max = '2099-12-31';
       document.getElementById('endDateInput').min = MIN_DATE;
-      document.getElementById('endDateInput').max = MAX_DATE;
+      document.getElementById('endDateInput').max = '2099-12-31';
     }
 
     function handleDateChange() {
       currentStartDate = document.getElementById('startDateInput').value || MIN_DATE;
-      currentEndDate = document.getElementById('endDateInput').value || MAX_DATE;
+      currentEndDate = document.getElementById('endDateInput').value || getTodayISO();
       clearDateBtnStyles();
       applyFilters();
     }
@@ -668,9 +686,10 @@
 
     function setDatePreset(preset) {
       clearDateBtnStyles();
+      const todayISO = getTodayISO();
       if (preset === 'ALL') {
         currentStartDate = MIN_DATE;
-        currentEndDate = MAX_DATE;
+        currentEndDate = todayISO;
         document.getElementById('btnDateAll').className = 'px-3 py-1.5 rounded-xl bg-[#c5a059] text-[#0b192c] font-black text-[11px] text-center transition shadow-sm';
       } else if (preset === 'JULY') {
         currentStartDate = '2026-07-01';
@@ -678,13 +697,16 @@
         document.getElementById('btnDateJuly').className = 'px-3 py-1.5 rounded-xl bg-[#c5a059] text-[#0b192c] font-black text-[11px] text-center transition shadow-sm';
       } else if (preset === 'AUG') {
         currentStartDate = '2026-08-01';
-        currentEndDate = '2026-08-31';
+        currentEndDate = todayISO.startsWith('2026-08') ? todayISO : '2026-08-31';
         document.getElementById('btnDateAug').className = 'px-3 py-1.5 rounded-xl bg-[#c5a059] text-[#0b192c] font-black text-[11px] text-center transition shadow-sm';
       } else if (preset === 'LAST7') {
-        const d = new Date(MAX_DATE);
+        const d = new Date();
         d.setDate(d.getDate() - 7);
-        currentStartDate = d.toISOString().slice(0, 10);
-        currentEndDate = MAX_DATE;
+        const y7 = d.getFullYear();
+        const m7 = String(d.getMonth() + 1).padStart(2, '0');
+        const day7 = String(d.getDate()).padStart(2, '0');
+        currentStartDate = `${y7}-${m7}-${day7}`;
+        currentEndDate = todayISO;
         document.getElementById('btnDateLast7').className = 'px-3 py-1.5 rounded-xl bg-[#c5a059] text-[#0b192c] font-black text-[11px] text-center transition shadow-sm';
       }
       document.getElementById('startDateInput').value = currentStartDate;
