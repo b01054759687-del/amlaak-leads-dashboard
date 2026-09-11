@@ -1,0 +1,21 @@
+{
+  "name": "amlaak-leads-dashboard",
+  "version": "1.2.0",
+  "description": "Executive BI Closed-Loop Attribution Dashboard for Amlaak Design",
+  "main": "index.html",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "sync": "node scripts/sync.js",
+    "test": "node scripts/test.js"
+  },
+  "keywords": [
+    "amlaak",
+    "bi-dashboard",
+    "meta-ads",
+    "crm-attribution",
+    "closed-loop"
+  ],
+  "author": "Amlaak Design",
+  "license": "UNLICENSED",
+  "private": true
+}
