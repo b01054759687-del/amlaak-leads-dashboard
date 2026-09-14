@@ -3,7 +3,7 @@ const https = require('https');
 const fs = require('fs');
 
 const SHEET_ID = '1S1a3OH6U-7nySBxNRqzBL83CEXEjRZDFEMWC2kUepFA';
-const tabs = ['Sheet25', 'Sheet26', 'Sheet27', 'Form 1/9/2026-copy', 'Form 7-9-2026'];
+const tabs = ['Sheet25', 'Sheet26', 'Sheet27', 'Form 1/9/2026-copy', 'Form 7-9-2026', 'Form SA 8-9-2026 ( No Conditional Logic )'];
 
 // GID map — use export?format=csv&gid=GID which bypasses ALL Google Sheets UI filters
 const SHEET_GID_MAP = {
@@ -12,7 +12,8 @@ const SHEET_GID_MAP = {
   'Sheet27': '193385057',
   'Form 1/9/2026-copy': '1471405191',
   'Form 7-9-2026': '131674355',
-  'Meta_Spend_Daily': 'gviz'  // no filter risk on Meta spend; keep gviz
+  'Form SA 8-9-2026 ( No Conditional Logic )': '1144296013',
+  'Meta_Spend_Daily': '1688475147'
 };
 
 
@@ -1076,7 +1077,8 @@ async function generatePerfectPortal() {
       { name: 'Sheet26', gid: '1406811815' },
       { name: 'Sheet27', gid: '193385057' },
       { name: 'Form 1/9/2026-copy', gid: '1471405191' },
-      { name: 'Form 7-9-2026', gid: '131674355' }
+      { name: 'Form 7-9-2026', gid: '131674355' },
+      { name: 'Form SA 8-9-2026 ( No Conditional Logic )', gid: '1144296013' }
     ];
 
     // Strict Baseline datasets directly parsed from sheets
@@ -1366,7 +1368,7 @@ async function generatePerfectPortal() {
         const metaAdsetMap = {};
         const metaCampMap = {};
         try {
-          const metaUrl = \`https://docs.google.com/spreadsheets/d/\${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Meta_Spend_Daily\`;
+          const metaUrl = \`https://docs.google.com/spreadsheets/d/\${GOOGLE_SHEET_ID}/export?format=csv&gid=1688475147\`;
           const metaResp = await fetch(metaUrl);
           if (metaResp.ok) {
             const metaCsv = await metaResp.text();
