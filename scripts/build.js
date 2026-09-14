@@ -356,12 +356,12 @@ async function generatePerfectPortal() {
       const spend = parseFloat(cleanText(r[7]).replace(/,/g, '')) || 0;
       const results = parseInt(cleanText(r[9])) || 0;
 
-      // Apply canonical resolution to bypass Google Sheets 15-digit precision rounding
-      const campaignId = canonMaps.resolveCampId(rawCampId, rawCampName);
+      // Preserve authentic Meta IDs directly from Meta_Spend_Daily
+      const campaignId = rawCampId;
       const campaignName = rawCampName;
-      const adsetId = canonMaps.resolveAdsetId(rawAdsetId, rawAdsetName);
+      const adsetId = rawAdsetId;
       const adsetName = rawAdsetName;
-      const adId = canonMaps.resolveAdId(rawAdId, rawAdName);
+      const adId = rawAdId;
       const adName = rawAdName;
 
       if (adId && adName) metaAdMap[adId] = adName;
@@ -1388,16 +1388,7 @@ async function generatePerfectPortal() {
                 const spend = parseFloat(cleanText(r[7]).replace(/,/g, '')) || 0;
                 const results = parseInt(cleanText(r[9])) || 0;
 
-                // Match with CRM leads canonical IDs (exact, 13-digit prefix, or name)
-                const cLead = ALL_LEADS.find(l => matchIdsOrNames(l.campaignId, l.campaignName, campaignId, campaignName));
-                if (cLead && cLead.campaignId) campaignId = cLead.campaignId;
-
-                const asLead = ALL_LEADS.find(l => matchIdsOrNames(l.adsetId, l.adsetName, adsetId, adsetName));
-                if (asLead && asLead.adsetId) adsetId = asLead.adsetId;
-
-                const aLead = ALL_LEADS.find(l => matchIdsOrNames(l.adId, l.adName, adId, adName));
-                if (aLead && aLead.adId) adId = aLead.adId;
-
+                // Preserve authentic Meta IDs directly from Meta_Spend_Daily without altering
                 if (adId && adName) metaAdMap[adId] = adName;
                 if (adsetId && adsetName) metaAdsetMap[adsetId] = adsetName;
                 if (campaignId && campaignName) metaCampMap[campaignId] = campaignName;
@@ -1595,7 +1586,11 @@ async function generatePerfectPortal() {
       }
       const adMap = {};
       adDataset.forEach(s => {
-        if (s.adId && s.adName) adMap[s.adId] = s.adName;
+        if (s.adId && s.adName) {
+          const isSA = /\bSA\b/i.test(s.campaignName) || /\bSA\b/i.test(s.adsetName) || /\bSA\b/i.test(s.adName) || /مغتربين/i.test(s.campaignName);
+          const tag = isSA ? '🇸🇦 [SA مغتربين]' : '🇪🇬 [EG مصر]';
+          adMap[s.adId] = \`\${tag} \${s.adName}\`;
+        }
       });
       let adHtml = '<option value="ALL">🎬 كل الإعلانات والكرييتف (All Ads)</option>';
       Object.entries(adMap).forEach(([id, name]) => {
@@ -2025,21 +2020,9 @@ async function generatePerfectPortal() {
       // EXACT ID LINKAGE
       const leadsInRange = ALL_LEADS.filter(l => {
         if (l.date && (l.date < campStartDate || l.date > campEndDate)) return false;
-        if (selectedCampaignId !== 'ALL') {
-          const matchCamp = l.campaignId === selectedCampaignId ||
-                            (l.campaignId && selectedCampaignId && l.campaignId.length >= 13 && selectedCampaignId.length >= 13 && l.campaignId.slice(0, 13) === selectedCampaignId.slice(0, 13));
-          if (!matchCamp) return false;
-        }
-        if (selectedAdsetId !== 'ALL') {
-          const matchAdset = l.adsetId === selectedAdsetId ||
-                             (l.adsetId && selectedAdsetId && l.adsetId.length >= 13 && selectedAdsetId.length >= 13 && l.adsetId.slice(0, 13) === selectedAdsetId.slice(0, 13));
-          if (!matchAdset) return false;
-        }
-        if (selectedAdId !== 'ALL') {
-          const matchAd = l.adId === selectedAdId ||
-                          (l.adId && selectedAdId && l.adId.length >= 13 && selectedAdId.length >= 13 && l.adId.slice(0, 13) === selectedAdId.slice(0, 13));
-          if (!matchAd) return false;
-        }
+        if (selectedCampaignId !== 'ALL' && l.campaignId !== selectedCampaignId) return false;
+        if (selectedAdsetId !== 'ALL' && l.adsetId !== selectedAdsetId) return false;
+        if (selectedAdId !== 'ALL' && l.adId !== selectedAdId) return false;
         return true;
       });
 
@@ -2272,21 +2255,9 @@ async function generatePerfectPortal() {
 
       const leadsInRange = ALL_LEADS.filter(l => {
         if (!l.date || l.date < campStartDate || l.date > campEndDate) return false;
-        if (selectedCampaignId !== 'ALL') {
-          const matchCamp = l.campaignId === selectedCampaignId ||
-                            (l.campaignId && selectedCampaignId && l.campaignId.length >= 13 && selectedCampaignId.length >= 13 && l.campaignId.slice(0, 13) === selectedCampaignId.slice(0, 13));
-          if (!matchCamp) return false;
-        }
-        if (selectedAdsetId !== 'ALL') {
-          const matchAdset = l.adsetId === selectedAdsetId ||
-                             (l.adsetId && selectedAdsetId && l.adsetId.length >= 13 && selectedAdsetId.length >= 13 && l.adsetId.slice(0, 13) === selectedAdsetId.slice(0, 13));
-          if (!matchAdset) return false;
-        }
-        if (selectedAdId !== 'ALL') {
-          const matchAd = l.adId === selectedAdId ||
-                          (l.adId && selectedAdId && l.adId.length >= 13 && selectedAdId.length >= 13 && l.adId.slice(0, 13) === selectedAdId.slice(0, 13));
-          if (!matchAd) return false;
-        }
+        if (selectedCampaignId !== 'ALL' && l.campaignId !== selectedCampaignId) return false;
+        if (selectedAdsetId !== 'ALL' && l.adsetId !== selectedAdsetId) return false;
+        if (selectedAdId !== 'ALL' && l.adId !== selectedAdId) return false;
         return true;
       });
 
@@ -2296,6 +2267,7 @@ async function generatePerfectPortal() {
         thead.innerHTML =
           \`<th class="p-3 w-8 text-left text-slate-400">#</th>\` +
           makeThSort('name',     'Campaign Name') +
+          makeThSort('country',  'Market (الدولة)') +
           makeThSort('spend',    'Spend (EGP)') +
           makeThSort('crmLeads', 'CRM Leads') +
           makeThSort('cpl',      'CPL') +
@@ -2308,23 +2280,50 @@ async function generatePerfectPortal() {
 
         const grouped = {};
         dataset.forEach(s => {
-          const key = s.campaignId;
-          if (!grouped[key]) grouped[key] = { id: key, name: s.campaignName, spend: 0, metaLeads: 0, crmLeads: 0, qual: 0, meetings: 0, deals: 0 };
+          const key = s.campaignId || s.campaignName;
+          const isSA = /\bSA\b/i.test(s.campaignName) || /مغتربين/i.test(s.campaignName);
+          if (!grouped[key]) {
+            grouped[key] = {
+              id: s.campaignId || key,
+              name: s.campaignName,
+              country: isSA ? 'Saudi Arabia (مغتربين)' : 'Egypt (مصر)',
+              isSA: isSA,
+              spend: 0,
+              metaLeads: 0,
+              crmLeads: 0,
+              qual: 0,
+              meetings: 0,
+              deals: 0
+            };
+          }
           grouped[key].spend += s.spend || 0;
           grouped[key].metaLeads += s.results || 0;
         });
+
+        // Also include active campaigns that had CRM leads in range even if spend was 0 in dataset
         leadsInRange.forEach(l => {
-          // Robust multi-layer match: exact ID -> 13-digit prefix -> normalized name
+          const key = l.campaignId || l.campaignName;
+          const isSA = /\bSA\b/i.test(l.campaignName) || /مغتربين/i.test(l.campaignName) || (l.country && l.country.includes('KSA'));
+          if (key && !grouped[key]) {
+            grouped[key] = {
+              id: l.campaignId || key,
+              name: l.campaignName || 'General Campaign',
+              country: isSA ? 'Saudi Arabia (مغتربين)' : 'Egypt (مصر)',
+              isSA: isSA,
+              spend: 0,
+              metaLeads: 0,
+              crmLeads: 0,
+              qual: 0,
+              meetings: 0,
+              deals: 0
+            };
+          }
+        });
+
+        leadsInRange.forEach(l => {
           let target = grouped[l.campaignId];
-          if (!target) {
-            const lPrefix = l.campaignId ? l.campaignId.slice(0, 13) : '';
-            const lNorm = normalizeName(l.campaignName);
-            for (const key of Object.keys(grouped)) {
-              const g = grouped[key];
-              if (lPrefix && key.length >= 13 && key.slice(0, 13) === lPrefix) { target = g; break; }
-              const gNorm = normalizeName(g.name);
-              if (lNorm && gNorm && (lNorm === gNorm || lNorm.includes(gNorm) || gNorm.includes(lNorm))) { target = g; break; }
-            }
+          if (!target && l.campaignName) {
+            target = Object.values(grouped).find(g => normalizeName(g.name) === normalizeName(l.campaignName));
           }
           if (target) {
             target.crmLeads++;
@@ -2347,11 +2346,16 @@ async function generatePerfectPortal() {
           const tr = document.createElement('tr');
           tr.className = \`transition border-b border-slate-800 cursor-pointer \${isSelected ? 'bg-amber-500/10 border-amber-500/30' : 'hover:bg-slate-800/60'}\`;
           const qrColor = getQualRateColor(r.qualRate);
+          const badge = r.isSA
+            ? '<span class="px-2.5 py-0.5 rounded-full font-black text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 inline-flex items-center gap-1">🇸🇦 SA (مغتربين)</span>'
+            : '<span class="px-2.5 py-0.5 rounded-full font-black text-[10px] bg-blue-500/20 text-cyan-300 border border-cyan-500/30 inline-flex items-center gap-1">🇪🇬 EG (مصر)</span>';
+
           tr.innerHTML = \`
             <td class="p-3 text-left" onclick="event.stopPropagation()"><input type="checkbox" class="accent-amber-400 cursor-pointer" \${isSelected ? 'checked' : ''} onchange="toggleBreakdownRow('\${r.id}', \${JSON.stringify(r).replace(/"/g,'&quot;')})" /></td>
             <td class="p-3 font-bold text-white font-sans text-xs max-w-xs truncate hover:text-[#fce8a5] text-left" title="\${r.name}" onclick="drilldownToCampaign('\${r.id}')">
               <i class="fa-solid fa-bullhorn text-blue-400 mr-1.5"></i> \${r.name}
             </td>
+            <td class="p-3 text-left whitespace-nowrap">\${badge}</td>
             <td class="p-3 text-blue-300 font-bold text-left">\${r.spend.toLocaleString('en-US',{minimumFractionDigits:2})} EGP</td>
             <td class="p-3 text-emerald-300 font-black text-sm text-left">\${r.crmLeads}</td>
             <td class="p-3 text-cyan-300 font-bold text-left">\${r.cpl.toFixed(2)} EGP</td>
@@ -2375,6 +2379,7 @@ async function generatePerfectPortal() {
         thead.innerHTML =
           \`<th class="p-3 w-8 text-left text-slate-400">#</th>\` +
           makeThSort('name',     'Ad Set Name') +
+          makeThSort('country',  'Market (الدولة)') +
           makeThSort('camp',     'Parent Campaign') +
           makeThSort('spend',    'Spend (EGP)') +
           makeThSort('crmLeads', 'CRM Leads') +
@@ -2386,22 +2391,47 @@ async function generatePerfectPortal() {
 
         const grouped = {};
         dataset.forEach(s => {
-          const key = s.adsetId;
-          if (!grouped[key]) grouped[key] = { id: key, name: s.adsetName, camp: s.campaignName, spend: 0, metaLeads: 0, crmLeads: 0, qual: 0 };
+          const key = s.adsetId || s.adsetName;
+          const isSA = /\bSA\b/i.test(s.campaignName) || /\bSA\b/i.test(s.adsetName) || /مغتربين/i.test(s.campaignName);
+          if (!grouped[key]) {
+            grouped[key] = {
+              id: s.adsetId || key,
+              name: s.adsetName,
+              camp: s.campaignName,
+              country: isSA ? 'Saudi Arabia (مغتربين)' : 'Egypt (مصر)',
+              isSA: isSA,
+              spend: 0,
+              metaLeads: 0,
+              crmLeads: 0,
+              qual: 0
+            };
+          }
           grouped[key].spend += s.spend || 0;
           grouped[key].metaLeads += s.results || 0;
         });
+
+        leadsInRange.forEach(l => {
+          const key = l.adsetId || l.adsetName;
+          const isSA = /\bSA\b/i.test(l.campaignName) || /\bSA\b/i.test(l.adsetName) || /مغتربين/i.test(l.campaignName) || (l.country && l.country.includes('KSA'));
+          if (key && !grouped[key]) {
+            grouped[key] = {
+              id: l.adsetId || key,
+              name: l.adsetName || 'General Ad Set',
+              camp: l.campaignName,
+              country: isSA ? 'Saudi Arabia (مغتربين)' : 'Egypt (مصر)',
+              isSA: isSA,
+              spend: 0,
+              metaLeads: 0,
+              crmLeads: 0,
+              qual: 0
+            };
+          }
+        });
+
         leadsInRange.forEach(l => {
           let target = grouped[l.adsetId];
-          if (!target) {
-            const lPrefix = l.adsetId ? l.adsetId.slice(0, 13) : '';
-            const lNorm = normalizeName(l.adsetName);
-            for (const key of Object.keys(grouped)) {
-              const g = grouped[key];
-              if (lPrefix && key.length >= 13 && key.slice(0, 13) === lPrefix) { target = g; break; }
-              const gNorm = normalizeName(g.name);
-              if (lNorm && gNorm && (lNorm === gNorm || lNorm.includes(gNorm) || gNorm.includes(lNorm))) { target = g; break; }
-            }
+          if (!target && l.adsetName) {
+            target = Object.values(grouped).find(g => normalizeName(g.name) === normalizeName(l.adsetName));
           }
           if (target) {
             target.crmLeads++;
@@ -2422,12 +2452,17 @@ async function generatePerfectPortal() {
           const tr = document.createElement('tr');
           tr.className = \`transition border-b border-slate-800 cursor-pointer \${isSelected ? 'bg-amber-500/10 border-amber-500/30' : 'hover:bg-slate-800/60'}\`;
           const qrColor = getQualRateColor(r.qualRate);
+          const badge = r.isSA
+            ? '<span class="px-2.5 py-0.5 rounded-full font-black text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 inline-flex items-center gap-1">🇸🇦 SA (مغتربين)</span>'
+            : '<span class="px-2.5 py-0.5 rounded-full font-black text-[10px] bg-blue-500/20 text-cyan-300 border border-cyan-500/30 inline-flex items-center gap-1">🇪🇬 EG (مصر)</span>';
+
           tr.innerHTML = \`
             <td class="p-3 text-left" onclick="event.stopPropagation()"><input type="checkbox" class="accent-amber-400 cursor-pointer" \${isSelected ? 'checked' : ''} onchange="toggleBreakdownRow('\${r.id}', \${JSON.stringify(r).replace(/"/g,'&quot;')})" /></td>
             <td class="p-3 font-bold text-white font-sans text-xs max-w-sm truncate hover:text-[#fce8a5] text-left" title="\${r.name}" onclick="drilldownToAdset('\${r.id}')">
               <i class="fa-solid fa-layer-group text-purple-400 mr-1.5"></i> \${r.name}
             </td>
-            <td class="p-3 text-slate-400 text-[11px] truncate max-w-xs text-left">\${r.camp}</td>
+            <td class="p-3 text-left whitespace-nowrap">\${badge}</td>
+            <td class="p-3 text-slate-400 text-[11px] truncate max-w-xs text-left" title="\${r.camp}">\${r.camp}</td>
             <td class="p-3 text-blue-300 font-bold text-left">\${r.spend.toLocaleString('en-US',{minimumFractionDigits:2})} EGP</td>
             <td class="p-3 text-emerald-300 font-black text-sm text-left">\${r.crmLeads}</td>
             <td class="p-3 text-cyan-300 font-bold text-left">\${r.cpl.toFixed(2)} EGP</td>
@@ -2449,6 +2484,7 @@ async function generatePerfectPortal() {
         thead.innerHTML =
           \`<th class="p-3 w-8 text-left text-slate-400">#</th>\` +
           makeThSort('name',     'Ad / Creative Name') +
+          makeThSort('country',  'Market (الدولة)') +
           makeThSort('adsetName','Parent Ad Set') +
           makeThSort('spend',    'Spend (EGP)') +
           makeThSort('crmLeads', 'CRM Leads') +
@@ -2459,24 +2495,51 @@ async function generatePerfectPortal() {
 
         const grouped = {};
         dataset.forEach(s => {
-          const key = s.adId;
+          const key = s.adId || (s.adsetId + '_' + s.adName);
+          const isSA = /\bSA\b/i.test(s.campaignName) || /\bSA\b/i.test(s.adsetName) || /\bSA\b/i.test(s.adName) || /مغتربين/i.test(s.campaignName);
           if (!grouped[key]) {
-            grouped[key] = { id: key, name: s.adName, adsetName: s.adsetName, campName: s.campaignName, spend: 0, metaLeads: 0, crmLeads: 0, qual: 0 };
+            grouped[key] = {
+              id: s.adId || key,
+              name: s.adName,
+              adsetId: s.adsetId,
+              adsetName: s.adsetName,
+              campName: s.campaignName,
+              country: isSA ? 'Saudi Arabia (مغتربين)' : 'Egypt (مصر)',
+              isSA: isSA,
+              spend: 0,
+              metaLeads: 0,
+              crmLeads: 0,
+              qual: 0
+            };
           }
           grouped[key].spend += s.spend || 0;
           grouped[key].metaLeads += s.results || 0;
         });
+
         leadsInRange.forEach(l => {
-          let target = grouped[l.adId];
-          if (!target) {
-            const lPrefix = l.adId ? l.adId.slice(0, 13) : '';
-            const lNorm = normalizeName(l.adName);
-            for (const key of Object.keys(grouped)) {
-              const g = grouped[key];
-              if (lPrefix && key.length >= 13 && key.slice(0, 13) === lPrefix) { target = g; break; }
-              const gNorm = normalizeName(g.name);
-              if (lNorm && gNorm && (lNorm === gNorm || lNorm.includes(gNorm) || gNorm.includes(lNorm))) { target = g; break; }
-            }
+          const key = l.adId || (l.adsetId + '_' + l.adName);
+          const isSA = /\bSA\b/i.test(l.campaignName) || /\bSA\b/i.test(l.adsetName) || /\bSA\b/i.test(l.adName) || /مغتربين/i.test(l.campaignName) || (l.country && l.country.includes('KSA'));
+          if (key && !grouped[key]) {
+            grouped[key] = {
+              id: l.adId || key,
+              name: l.adName || 'General Ad',
+              adsetId: l.adsetId,
+              adsetName: l.adsetName,
+              campName: l.campaignName,
+              country: isSA ? 'Saudi Arabia (مغتربين)' : 'Egypt (مصر)',
+              isSA: isSA,
+              spend: 0,
+              metaLeads: 0,
+              crmLeads: 0,
+              qual: 0
+            };
+          }
+        });
+
+        leadsInRange.forEach(l => {
+          let target = grouped[l.adId] || grouped[l.adsetId + '_' + l.adName];
+          if (!target && l.adName) {
+            target = Object.values(grouped).find(g => (g.adsetId === l.adsetId || !l.adsetId) && normalizeName(g.name) === normalizeName(l.adName));
           }
           if (target) {
             target.crmLeads++;
@@ -2497,15 +2560,16 @@ async function generatePerfectPortal() {
           const tr = document.createElement('tr');
           tr.className = \`transition border-b border-slate-800 cursor-pointer \${isSelected ? 'bg-amber-500/10 border-amber-500/30' : 'hover:bg-slate-800/60'}\`;
           const qrColor = getQualRateColor(r.qualRate);
-          let badge = '<span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 text-[10px]">EG</span>';
-          if (r.campName.includes('SA') || r.adsetName.includes('SA') || r.name.toLowerCase().includes('sa ')) {
-            badge = '<span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 text-[10px]">SA (مغتربين)</span>';
-          }
+          const badge = r.isSA
+            ? '<span class="px-2.5 py-0.5 rounded-full font-black text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 inline-flex items-center gap-1">🇸🇦 SA (مغتربين)</span>'
+            : '<span class="px-2.5 py-0.5 rounded-full font-black text-[10px] bg-blue-500/20 text-cyan-300 border border-cyan-500/30 inline-flex items-center gap-1">🇪🇬 EG (مصر)</span>';
+
           tr.innerHTML = \`
             <td class="p-3 text-left" onclick="event.stopPropagation()"><input type="checkbox" class="accent-amber-400 cursor-pointer" \${isSelected ? 'checked' : ''} onchange="toggleBreakdownRow('\${r.id}', \${JSON.stringify(r).replace(/"/g,'&quot;')})" /></td>
             <td class="p-3 font-bold text-white font-sans text-xs max-w-sm truncate text-left" title="\${r.name}">
-              <i class="fa-solid fa-rectangle-ad text-amber-400 mr-1.5"></i> \${r.name} \${badge}
+              <i class="fa-solid fa-rectangle-ad text-amber-400 mr-1.5"></i> \${r.name}
             </td>
+            <td class="p-3 text-left whitespace-nowrap">\${badge}</td>
             <td class="p-3 text-slate-400 text-[11px] truncate max-w-xs text-left" title="\${r.adsetName}">\${r.adsetName}</td>
             <td class="p-3 text-blue-300 font-bold text-left">\${r.spend.toLocaleString('en-US',{minimumFractionDigits:2})} EGP</td>
             <td class="p-3 text-emerald-300 font-black text-sm text-left">\${r.crmLeads}</td>
