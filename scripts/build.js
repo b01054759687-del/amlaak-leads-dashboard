@@ -714,13 +714,15 @@ async function generatePerfectPortal() {
           </div>
 
           <!-- Date Presets -->
-          <div class="grid grid-cols-3 sm:flex items-center gap-1.5 w-full lg:w-auto flex-wrap">
-            <button onclick="setLeadsDatePreset('ALL')" id="btnDateAll" class="px-2.5 py-1.5 rounded-xl bg-[#c5a059] text-[#0b192c] font-black text-[11px] text-center transition shadow-sm">All Time</button>
+          <div class="grid grid-cols-4 sm:flex items-center gap-1.5 w-full lg:w-auto flex-wrap">
+            <button onclick="setLeadsDatePreset('ALL')" id="btnDateAll" class="px-2.5 py-1.5 rounded-xl bg-[#c5a059] text-[#0b192c] font-black text-[11px] text-center transition shadow-sm border border-amber-300">All Time</button>
             <button onclick="setLeadsDatePreset('JULY')" id="btnDateJuly" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">July</button>
             <button onclick="setLeadsDatePreset('AUG')" id="btnDateAug" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">August</button>
             <button onclick="setLeadsDatePreset('SEPT')" id="btnDateSept" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">Sept</button>
             <button onclick="setLeadsDatePreset('OCT')" id="btnDateOct" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">October</button>
-            <button onclick="setLeadsDatePreset('LAST7')" id="btnDateLast7" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">Last 7 Days</button>
+            <button onclick="setLeadsDatePreset('LAST30')" id="btnDateLast30" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">30 Days</button>
+            <button onclick="setLeadsDatePreset('LAST14')" id="btnDateLast14" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">14 Days</button>
+            <button onclick="setLeadsDatePreset('LAST7')" id="btnDateLast7" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">7 Days</button>
           </div>
         </div>
 
@@ -866,6 +868,98 @@ async function generatePerfectPortal() {
           </div>
           <div id="kpiDeals" class="text-xl sm:text-2xl font-black text-emerald-300 font-mono">-</div>
           <div class="text-[10px] text-emerald-400 mt-1 font-bold">Signed Deals</div>
+        </div>
+      </div>
+
+      <!-- FULL-FUNNEL CLOSED-LOOP CONVERSION PIPELINE SECTION -->
+      <div class="glass-card p-4 sm:p-5 rounded-2xl mb-5 border-amber-500/30">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-sm sm:text-base font-extrabold text-[#c5a059] flex items-center gap-2">
+              <i class="fa-solid fa-filter-circle-dollar text-amber-400"></i> مسار التحويل والمبيعات الشامل (Full-Funnel Sales Pipeline)
+            </h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">متابعة حية من التسجيل والتأهيل إلى المعاينات المنعقدة والتعاقدات الموقعة (Conducted Scannings & Signed Deals)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 font-mono">
+              <i class="fa-solid fa-arrow-trend-up"></i> Closed-Loop Attribution
+            </span>
+          </div>
+        </div>
+
+        <!-- 5-Stage Step Flow -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+          <!-- Step 1: All Leads -->
+          <div onclick="filterFunnelStage('ALL')" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-blue-400 cursor-pointer transition group">
+            <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold mb-1.5">
+              <span>1. إجمالي العملاء</span>
+              <i class="fa-solid fa-users text-blue-400 group-hover:scale-110 transition"></i>
+            </div>
+            <div id="funnelTotal" class="text-xl font-black text-white font-mono">-</div>
+            <div class="text-[10px] text-blue-300 mt-1 font-bold">100% Ingested Leads</div>
+            <div class="mt-2 text-[9px] text-slate-400 pt-1.5 border-t border-slate-800">قاعدة البيانات الكاملة</div>
+          </div>
+
+          <!-- Step 2: Qualified -->
+          <div onclick="filterFunnelStage('QUALIFIED')" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-emerald-400 cursor-pointer transition group">
+            <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold mb-1.5">
+              <span>2. العملاء المؤهلين</span>
+              <i class="fa-solid fa-circle-check text-emerald-400 group-hover:scale-110 transition"></i>
+            </div>
+            <div id="funnelQualified" class="text-xl font-black text-emerald-400 font-mono">-</div>
+            <div id="funnelQualRate" class="text-[10px] text-emerald-300 mt-1 font-bold">0% Qualification</div>
+            <div class="mt-2 text-[9px] text-slate-400 pt-1.5 border-t border-slate-800">مطابقين لمعايير أملاك</div>
+          </div>
+
+          <!-- Step 3: Dead Status / Pipeline Stage -->
+          <div onclick="filterFunnelStage('PIPELINE')" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-purple-400 cursor-pointer transition group">
+            <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold mb-1.5">
+              <span>3. التفاوض والتقييم</span>
+              <i class="fa-solid fa-hourglass-half text-purple-400 group-hover:scale-110 transition"></i>
+            </div>
+            <div id="funnelPipeline" class="text-xl font-black text-purple-300 font-mono">-</div>
+            <div id="funnelPipelineBreakdown" class="text-[9px] text-purple-200 mt-1 font-semibold flex items-center justify-between">
+              <span>Active: <b id="funnelActiveCount">-</b></span>
+              <span>Lost: <b id="funnelLostCount" class="text-rose-400">-</b></span>
+            </div>
+            <div class="mt-2 text-[9px] text-slate-400 pt-1.5 border-t border-slate-800">Dead Status Breakdown</div>
+          </div>
+
+          <!-- Step 4: Conducted Scanning -->
+          <div onclick="filterFunnelStage('SCANNING')" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-cyan-400 cursor-pointer transition group">
+            <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold mb-1.5">
+              <span>4. المعاينات المنعقدة</span>
+              <i class="fa-solid fa-calendar-check text-cyan-400 group-hover:scale-110 transition"></i>
+            </div>
+            <div id="funnelScanning" class="text-xl font-black text-cyan-300 font-mono">-</div>
+            <div id="funnelScanningRate" class="text-[10px] text-cyan-300 mt-1 font-bold">0% of Qualified</div>
+            <div class="mt-2 text-[9px] text-slate-400 pt-1.5 border-t border-slate-800">من واقع تاريخ المعاينة</div>
+          </div>
+
+          <!-- Step 5: Signed Deals -->
+          <div onclick="filterFunnelStage('DEALS')" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-amber-400 cursor-pointer transition group">
+            <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold mb-1.5">
+              <span>5. العقود الموقعة</span>
+              <i class="fa-solid fa-file-signature text-amber-400 group-hover:scale-110 transition"></i>
+            </div>
+            <div id="funnelDeals" class="text-xl font-black text-emerald-300 font-mono">-</div>
+            <div id="funnelCloseRate" class="text-[10px] text-emerald-400 mt-1 font-bold">0% Close Rate</div>
+            <div class="mt-2 text-[9px] text-slate-400 pt-1.5 border-t border-slate-800">من واقع تاريخ التعاقد</div>
+          </div>
+        </div>
+
+        <!-- Funnel Conversion Progress Bar -->
+        <div class="mt-4 pt-3 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
+          <div class="flex items-center gap-2 flex-wrap text-[11px]">
+            <span class="text-slate-400">معدل التحويل الكلي (Funnel Efficiency):</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold font-mono" id="funnelTotalConversion">-</span>
+            <span class="text-slate-500">|</span>
+            <span class="text-slate-400">معدل إغلاق المعاينات لعقود:</span>
+            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold font-mono" id="funnelMeetingToDealRate">-</span>
+          </div>
+          <div class="text-[10px] text-slate-400 italic">
+            💡 اضغط على أي بطاقة بالأعلى لتصفية جدول العملاء فوراً حسب المرحلة
+          </div>
         </div>
       </div>
 
@@ -1875,10 +1969,17 @@ async function generatePerfectPortal() {
     function handleLeadsDateChange() {
       leadsStartDate = document.getElementById('startDateInput').value || '2026-07-22';
       leadsEndDate = document.getElementById('endDateInput').value || getTodayISO();
+      // Clear preset button highlights since user selected custom date
+      const allPresetIds = ['btnDateAll', 'btnDateJuly', 'btnDateAug', 'btnDateSept', 'btnDateOct', 'btnDateLast30', 'btnDateLast14', 'btnDateLast7'];
+      allPresetIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.className = 'px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition';
+      });
       applyLeadsFilters();
     }
 
     function setLeadsDatePreset(preset) {
+      const today = new Date();
       const todayISO = getTodayISO();
       if (preset === 'ALL') {
         leadsStartDate = '2026-07-22';
@@ -1895,12 +1996,44 @@ async function generatePerfectPortal() {
       } else if (preset === 'OCT') {
         leadsStartDate = '2026-10-01';
         leadsEndDate = todayISO;
+      } else if (preset === 'LAST30') {
+        const d = new Date(today);
+        d.setDate(d.getDate() - 30);
+        leadsStartDate = d.toISOString().slice(0, 10);
+        leadsEndDate = todayISO;
+      } else if (preset === 'LAST14') {
+        const d = new Date(today);
+        d.setDate(d.getDate() - 14);
+        leadsStartDate = d.toISOString().slice(0, 10);
+        leadsEndDate = todayISO;
       } else if (preset === 'LAST7') {
-        const d = new Date();
+        const d = new Date(today);
         d.setDate(d.getDate() - 7);
         leadsStartDate = d.toISOString().slice(0, 10);
         leadsEndDate = todayISO;
       }
+
+      // Dynamic Active State for Preset Buttons
+      const presetBtnIds = {
+        'ALL': 'btnDateAll',
+        'JULY': 'btnDateJuly',
+        'AUG': 'btnDateAug',
+        'SEPT': 'btnDateSept',
+        'OCT': 'btnDateOct',
+        'LAST30': 'btnDateLast30',
+        'LAST14': 'btnDateLast14',
+        'LAST7': 'btnDateLast7'
+      };
+      for (const [key, btnId] of Object.entries(presetBtnIds)) {
+        const btn = document.getElementById(btnId);
+        if (!btn) continue;
+        if (key === preset) {
+          btn.className = 'px-2.5 py-1.5 rounded-xl bg-[#c5a059] text-[#0b192c] font-black text-[11px] text-center transition shadow-md border border-amber-300';
+        } else {
+          btn.className = 'px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition';
+        }
+      }
+
       document.getElementById('startDateInput').value = leadsStartDate;
       document.getElementById('endDateInput').value = leadsEndDate;
       applyLeadsFilters();
@@ -1934,6 +2067,29 @@ async function generatePerfectPortal() {
       applyLeadsFilters();
     }
 
+    function filterFunnelStage(stage) {
+      if (stage === 'ALL') {
+        document.getElementById('statusFilter').value = 'ALL';
+        if (document.getElementById('deadStatusFilter')) document.getElementById('deadStatusFilter').value = 'ALL';
+        quickFilterState = null;
+      } else if (stage === 'QUALIFIED') {
+        document.getElementById('statusFilter').value = 'Qualified';
+        if (document.getElementById('deadStatusFilter')) document.getElementById('deadStatusFilter').value = 'ALL';
+        quickFilterState = null;
+      } else if (stage === 'PIPELINE') {
+        document.getElementById('statusFilter').value = 'Qualified';
+        if (document.getElementById('deadStatusFilter')) document.getElementById('deadStatusFilter').value = 'ALL';
+        quickFilterState = null;
+      } else if (stage === 'SCANNING') {
+        document.getElementById('statusFilter').value = 'ALL';
+        quickFilterState = 'MEETING';
+      } else if (stage === 'DEALS') {
+        document.getElementById('statusFilter').value = 'ALL';
+        quickFilterState = 'DEAL';
+      }
+      applyLeadsFilters();
+    }
+
     function applyLeadsFilters() {
       const st = document.getElementById('statusFilter').value;
       const deadSt = document.getElementById('deadStatusFilter') ? document.getElementById('deadStatusFilter').value : 'ALL';
@@ -1944,9 +2100,10 @@ async function generatePerfectPortal() {
 
       filteredLeads = ALL_LEADS.filter(l => {
         if (quickFilterState === 'QUALIFIED' && l.status !== 'Qualified') return false;
-        if (quickFilterState === 'MID_AREA' && (!l.areaCategory || !l.areaCategory.includes('150 - 250') && !l.areaCategory.includes('150-250'))) return false;
-        if (quickFilterState === 'KSA' && (!l.country || !l.country.includes('KSA') && !l.country.includes('السعودية'))) return false;
+        if (quickFilterState === 'MID_AREA' && (!l.areaCategory || (!l.areaCategory.includes('150 - 250') && !l.areaCategory.includes('150-250')))) return false;
+        if (quickFilterState === 'KSA' && (!l.country || (!l.country.includes('KSA') && !l.country.includes('السعودية')))) return false;
         if (quickFilterState === 'MEETING' && (!l.meetingDate || l.meetingDate.trim() === '')) return false;
+        if (quickFilterState === 'DEAL' && (!l.dealDate || l.dealDate.trim() === '')) return false;
 
         if (l.date && (l.date < leadsStartDate || l.date > leadsEndDate)) return false;
         if (maxArea < 500 && l.areaNum > 0 && l.areaNum > maxArea) return false;
@@ -1967,6 +2124,7 @@ async function generatePerfectPortal() {
       });
 
       updateLeadsKPIs();
+      updateFunnelKPIs();
       renderLeadsCharts();
       renderLeadsTable();
     }
@@ -1988,25 +2146,96 @@ async function generatePerfectPortal() {
       document.getElementById('kpiDeals').innerText = deals;
     }
 
+    function updateFunnelKPIs() {
+      const total = filteredLeads.length;
+      const qual = filteredLeads.filter(l => l.status === 'Qualified').length;
+      const closedLost = filteredLeads.filter(l => l.deadStatus && l.deadStatus.toLowerCase().includes('closed lost')).length;
+      const activePipeline = Math.max(0, qual - closedLost);
+      const meetings = filteredLeads.filter(l => l.meetingDate && l.meetingDate.trim() !== '').length;
+      const deals = filteredLeads.filter(l => l.dealDate && l.dealDate.trim() !== '').length;
+
+      const fTotal = document.getElementById('funnelTotal');
+      const fQual = document.getElementById('funnelQualified');
+      const fQualRate = document.getElementById('funnelQualRate');
+      const fPipe = document.getElementById('funnelPipeline');
+      const fActive = document.getElementById('funnelActiveCount');
+      const fLost = document.getElementById('funnelLostCount');
+      const fScan = document.getElementById('funnelScanning');
+      const fScanRate = document.getElementById('funnelScanningRate');
+      const fDeals = document.getElementById('funnelDeals');
+      const fCloseRate = document.getElementById('funnelCloseRate');
+      const fTotalConv = document.getElementById('funnelTotalConversion');
+      const fMeetingClose = document.getElementById('funnelMeetingToDealRate');
+
+      if (fTotal) fTotal.innerText = total;
+      if (fQual) fQual.innerText = qual;
+      if (fQualRate) fQualRate.innerText = total > 0 ? ((qual / total) * 100).toFixed(1) + '% من الإجمالي' : '0%';
+      if (fPipe) fPipe.innerText = qual;
+      if (fActive) fActive.innerText = activePipeline;
+      if (fLost) fLost.innerText = closedLost;
+      if (fScan) fScan.innerText = meetings;
+      if (fScanRate) fScanRate.innerText = qual > 0 ? ((meetings / qual) * 100).toFixed(1) + '% من المؤهلين' : '0%';
+      if (fDeals) fDeals.innerText = deals;
+      if (fCloseRate) fCloseRate.innerText = meetings > 0 ? ((deals / meetings) * 100).toFixed(1) + '% إغلاق المعاينات' : (qual > 0 ? ((deals / qual) * 100).toFixed(1) + '% من المؤهلين' : '0%');
+      if (fTotalConv) fTotalConv.innerText = total > 0 ? ((deals / total) * 100).toFixed(2) + '% (Deal / Lead)' : '0%';
+      if (fMeetingClose) fMeetingClose.innerText = meetings > 0 ? ((deals / meetings) * 100).toFixed(1) + '% (Deal / Scanning)' : '0%';
+    }
+
     function renderLeadsCharts() {
       const isMobile = window.innerWidth < 640;
 
-      // 1. Timeline Chart
+      // 1. Timeline Chart (Daily Incoming Leads with whole integers)
       const dateMap = {};
       filteredLeads.forEach(l => {
         if (!l.date) return;
         dateMap[l.date] = (dateMap[l.date] || 0) + 1;
       });
       const sortedDates = Object.keys(dateMap).sort();
+      const counts = sortedDates.map(d => dateMap[d]);
+      const maxVal = counts.length > 0 ? Math.max(...counts) : 10;
       const tOpts = {
-        series: [{ name: 'Incoming Leads', data: sortedDates.map(d => dateMap[d]) }],
-        chart: { type: 'area', height: isMobile ? 220 : 250, toolbar: { show: false }, background: 'transparent' },
+        series: [{ name: 'Incoming Leads (الليدات اليومية)', data: counts }],
+        chart: {
+          type: 'area',
+          height: isMobile ? 220 : 250,
+          toolbar: { show: false },
+          background: 'transparent',
+          zoom: { enabled: false }
+        },
         colors: ['#c5a059'],
         stroke: { curve: 'smooth', width: 2.5 },
         fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.05 } },
         dataLabels: { enabled: false },
-        xaxis: { categories: sortedDates, labels: { style: { colors: '#94a3b8', fontSize: '10px' } } },
-        yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '10px' } } },
+        xaxis: {
+          type: 'category',
+          categories: sortedDates,
+          labels: {
+            style: { colors: '#94a3b8', fontSize: '10px' },
+            rotate: -45,
+            hideOverlappingLabels: true,
+            formatter: (val) => {
+              if (!val) return '';
+              const parts = val.split('-');
+              if (parts.length === 3) return parts[2] + '/' + parts[1];
+              return val;
+            }
+          },
+          axisBorder: { color: '#334155' }
+        },
+        yaxis: {
+          min: 0,
+          max: Math.ceil(maxVal * 1.2),
+          forceNiceScale: true,
+          labels: {
+            formatter: (v) => Math.round(v),
+            style: { colors: '#94a3b8', fontSize: '10px' }
+          }
+        },
+        tooltip: {
+          theme: 'dark',
+          x: { formatter: (val, opts) => sortedDates[opts.dataPointIndex] || val },
+          y: { formatter: (v) => v + ' ليد' }
+        },
         grid: { borderColor: '#1e293b' },
         theme: { mode: 'dark' }
       };
