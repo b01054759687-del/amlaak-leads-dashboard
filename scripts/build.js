@@ -926,12 +926,12 @@ async function generatePerfectPortal() {
           <div class="w-full flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="filterFunnelStage('ALL')">
             <div class="w-32 sm:w-44 text-right text-xs sm:text-sm font-bold text-slate-300 flex items-center justify-end gap-1.5">
               <span>إجمالي العملاء</span>
-              <i class="fa-solid fa-users text-blue-400"></i>
+              <i class="fa-solid fa-users text-slate-400"></i>
             </div>
             <div class="flex-1 flex justify-center">
-              <div class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 text-white font-mono font-black text-xs sm:text-sm shadow-lg shadow-blue-900/30 flex items-center justify-between transition-all group-hover:scale-[1.01] group-hover:shadow-blue-500/20 border border-blue-400/30">
-                <span class="flex items-center gap-2"><i class="fa-solid fa-arrow-right-to-bracket text-xs opacity-75"></i> <b id="funnelTotal">-</b></span>
-                <span class="text-[11px] sm:text-xs font-bold text-blue-100 bg-blue-900/50 px-2.5 py-0.5 rounded-lg border border-blue-300/30">100% Leads</span>
+              <div class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#172033] via-[#1e293b] to-[#172033] text-slate-200 font-mono font-black text-xs sm:text-sm shadow-md shadow-slate-950/50 flex items-center justify-between transition-all group-hover:border-slate-500/70 border border-slate-700/70">
+                <span class="flex items-center gap-2 text-white"><i class="fa-solid fa-arrow-right-to-bracket text-xs opacity-75"></i> <b id="funnelTotal">-</b></span>
+                <span class="text-[11px] sm:text-xs font-bold text-slate-300 bg-slate-800/80 px-2.5 py-0.5 rounded-lg border border-slate-700/60 font-sans">100% Leads</span>
               </div>
             </div>
             <div class="w-24 sm:w-32 text-left text-[10px] text-slate-400 font-medium hidden sm:block">قاعدة البيانات الكاملة</div>
@@ -941,12 +941,12 @@ async function generatePerfectPortal() {
           <div class="w-full flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="filterFunnelStage('QUALIFIED')">
             <div class="w-32 sm:w-44 text-right text-xs sm:text-sm font-bold text-slate-300 flex items-center justify-end gap-1.5">
               <span>العملاء المؤهلين</span>
-              <i class="fa-solid fa-circle-check text-emerald-400"></i>
+              <i class="fa-solid fa-circle-check text-emerald-500/90"></i>
             </div>
             <div class="flex-1 flex justify-center">
-              <div class="w-[82%] py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 text-white font-mono font-black text-xs sm:text-sm shadow-lg shadow-cyan-900/30 flex items-center justify-between transition-all group-hover:scale-[1.01] group-hover:shadow-cyan-500/20 border border-cyan-400/30">
-                <span class="flex items-center gap-2"><i class="fa-solid fa-star text-amber-300 text-xs"></i> <b id="funnelQualified">-</b></span>
-                <span id="funnelQualRate" class="text-[11px] sm:text-xs font-bold text-cyan-100 bg-cyan-950/50 px-2.5 py-0.5 rounded-lg border border-cyan-300/30">-</span>
+              <div class="w-[82%] py-3 px-4 rounded-xl bg-gradient-to-r from-[#0d231a] via-[#133527] to-[#0d231a] text-emerald-100 font-mono font-black text-xs sm:text-sm shadow-md shadow-emerald-950/40 flex items-center justify-between transition-all group-hover:border-emerald-500/60 border border-emerald-600/40">
+                <span class="flex items-center gap-2 text-emerald-200"><i class="fa-solid fa-circle-check text-emerald-400 text-xs"></i> <b id="funnelQualified">-</b></span>
+                <span id="funnelQualRate" class="text-[11px] sm:text-xs font-bold text-emerald-300 bg-emerald-950/70 px-2.5 py-0.5 rounded-lg border border-emerald-600/30 font-sans">-</span>
               </div>
             </div>
             <div class="w-24 sm:w-32 text-left text-[10px] text-slate-400 font-medium hidden sm:block">مطابقين لمعايير أملاك</div>
@@ -956,15 +956,15 @@ async function generatePerfectPortal() {
           <div class="w-full flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="filterFunnelStage('PIPELINE')">
             <div class="w-32 sm:w-44 text-right text-xs sm:text-sm font-bold text-slate-300 flex items-center justify-end gap-1.5">
               <span>مرحلة التقييم والتفاوض</span>
-              <i class="fa-solid fa-hourglass-half text-purple-400"></i>
+              <i class="fa-solid fa-hourglass-half text-slate-400"></i>
             </div>
             <div class="flex-1 flex justify-center">
-              <div class="w-[66%] py-3 px-4 rounded-xl bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 text-white font-mono font-black text-xs sm:text-sm shadow-lg shadow-purple-900/30 flex items-center justify-between transition-all group-hover:scale-[1.01] group-hover:shadow-purple-500/20 border border-purple-400/30">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-comments text-xs opacity-75"></i> <b id="funnelPipeline">-</b></span>
-                <span class="text-[10px] sm:text-xs font-bold text-purple-100 bg-purple-950/50 px-2 py-0.5 rounded-lg border border-purple-300/30 flex items-center gap-2">
-                  <span>Active: <b id="funnelActiveCount">-</b></span>
-                  <span class="opacity-50">|</span>
-                  <span class="text-rose-300">Lost: <b id="funnelLostCount">-</b></span>
+              <div class="w-[66%] py-3 px-4 rounded-xl bg-gradient-to-r from-[#1c222e] via-[#262e3d] to-[#1c222e] text-slate-200 font-mono font-black text-xs sm:text-sm shadow-md shadow-slate-950/40 flex items-center justify-between transition-all group-hover:border-slate-500/60 border border-slate-700/60">
+                <span class="flex items-center gap-1.5 text-slate-200"><i class="fa-solid fa-comments text-xs opacity-75"></i> <b id="funnelPipeline">-</b></span>
+                <span class="text-[10px] sm:text-xs font-bold text-slate-300 bg-slate-900/80 px-2 py-0.5 rounded-lg border border-slate-700/60 flex items-center gap-2 font-sans">
+                  <span>Active: <b id="funnelActiveCount" class="text-[#c5a059] font-mono">-</b></span>
+                  <span class="opacity-40">|</span>
+                  <span class="text-rose-400/90">Lost: <b id="funnelLostCount" class="font-mono">-</b></span>
                 </span>
               </div>
             </div>
@@ -975,12 +975,12 @@ async function generatePerfectPortal() {
           <div class="w-full flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="filterFunnelStage('SCANNING')">
             <div class="w-32 sm:w-44 text-right text-xs sm:text-sm font-bold text-slate-300 flex items-center justify-end gap-1.5">
               <span>المعاينات المنعقدة</span>
-              <i class="fa-solid fa-calendar-check text-cyan-400"></i>
+              <i class="fa-solid fa-calendar-check text-[#7ca5b8]"></i>
             </div>
             <div class="flex-1 flex justify-center">
-              <div class="w-[50%] py-3 px-4 rounded-xl bg-gradient-to-r from-sky-600 via-cyan-600 to-blue-600 text-white font-mono font-black text-xs sm:text-sm shadow-lg shadow-cyan-900/30 flex items-center justify-between transition-all group-hover:scale-[1.01] group-hover:shadow-cyan-500/20 border border-cyan-400/30">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-clipboard-check text-xs opacity-75"></i> <b id="funnelScanning">-</b></span>
-                <span id="funnelScanningRate" class="text-[10px] sm:text-xs font-bold text-cyan-100 bg-cyan-950/50 px-2 py-0.5 rounded-lg border border-cyan-300/30">-</span>
+              <div class="w-[50%] py-3 px-4 rounded-xl bg-gradient-to-r from-[#14232c] via-[#1d3340] to-[#14232c] text-cyan-100 font-mono font-black text-xs sm:text-sm shadow-md shadow-cyan-950/30 flex items-center justify-between transition-all group-hover:border-[#3d6e8a]/70 border border-[#2a4d61]/60">
+                <span class="flex items-center gap-1.5 text-[#a5d0e2]"><i class="fa-solid fa-clipboard-check text-xs opacity-80"></i> <b id="funnelScanning">-</b></span>
+                <span id="funnelScanningRate" class="text-[10px] sm:text-xs font-bold text-[#8ec5dd] bg-[#0e1d26]/80 px-2 py-0.5 rounded-lg border border-[#2a4d61]/40 font-sans">-</span>
               </div>
             </div>
             <div class="w-24 sm:w-32 text-left text-[10px] text-slate-400 font-medium hidden sm:block">من واقع تاريخ المعاينة</div>
@@ -990,12 +990,12 @@ async function generatePerfectPortal() {
           <div class="w-full flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="filterFunnelStage('DEALS')">
             <div class="w-32 sm:w-44 text-right text-xs sm:text-sm font-bold text-slate-300 flex items-center justify-end gap-1.5">
               <span>التعاقدات الموقعة</span>
-              <i class="fa-solid fa-file-signature text-amber-400"></i>
+              <i class="fa-solid fa-file-signature text-[#c5a059]"></i>
             </div>
             <div class="flex-1 flex justify-center">
-              <div class="w-[34%] py-3 px-4 rounded-xl bg-gradient-to-r from-amber-600 via-emerald-600 to-teal-500 text-white font-mono font-black text-xs sm:text-sm shadow-xl shadow-amber-900/40 flex items-center justify-between transition-all group-hover:scale-[1.02] group-hover:shadow-amber-500/30 border border-amber-400/40">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-award text-amber-300 text-xs"></i> <b id="funnelDeals">-</b></span>
-                <span id="funnelCloseRate" class="text-[10px] sm:text-xs font-bold text-amber-100 bg-amber-950/50 px-2 py-0.5 rounded-lg border border-amber-300/30">-</span>
+              <div class="w-[34%] py-3 px-4 rounded-xl bg-gradient-to-r from-[#332612] via-[#4a3717] to-[#332612] text-[#fef3c7] font-mono font-black text-xs sm:text-sm shadow-lg shadow-[#c5a059]/15 flex items-center justify-between transition-all group-hover:scale-[1.02] group-hover:border-[#e5be70] border border-[#c5a059]/70">
+                <span class="flex items-center gap-1.5 text-[#fde047]"><i class="fa-solid fa-award text-[#c5a059] text-xs"></i> <b id="funnelDeals">-</b></span>
+                <span id="funnelCloseRate" class="text-[10px] sm:text-xs font-bold text-[#f6d892] bg-[#241a0b]/90 px-2 py-0.5 rounded-lg border border-[#c5a059]/50 font-sans">-</span>
               </div>
             </div>
             <div class="w-24 sm:w-32 text-left text-[10px] text-slate-400 font-medium hidden sm:block">من واقع تاريخ التعاقد</div>
@@ -1007,13 +1007,14 @@ async function generatePerfectPortal() {
         <div class="mt-5 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
           <div class="flex items-center gap-2 flex-wrap text-[11px]">
             <span class="text-slate-400 font-bold">معدل التحويل الكلي (Funnel Efficiency):</span>
-            <span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold font-mono border border-emerald-500/30" id="funnelTotalConversion">-</span>
+            <span class="px-2.5 py-1 rounded-lg bg-[#133527]/70 text-emerald-300 font-bold font-mono border border-emerald-600/40" id="funnelTotalConversion">-</span>
             <span class="text-slate-600">|</span>
             <span class="text-slate-400 font-bold">معدل إغلاق المعاينات لعقود:</span>
-            <span class="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 font-bold font-mono border border-cyan-500/30" id="funnelMeetingToDealRate">-</span>
+            <span class="px-2.5 py-1 rounded-lg bg-[#1d3340]/70 text-[#8ec5dd] font-bold font-mono border border-[#2a4d61]/50" id="funnelMeetingToDealRate">-</span>
           </div>
-          <div class="text-[10px] text-amber-400/90 font-semibold flex items-center gap-1">
-            <i class="fa-solid fa-hand-pointer text-xs"></i> اضغط على أي شريط بالقمع لتصفية جدول العملاء فوراً حسب المرحلة
+          <div class="text-[10px] text-slate-400 font-medium flex items-center gap-1.5">
+            <i class="fa-solid fa-hand-pointer text-xs text-[#c5a059]"></i>
+            <span>اضغط على أي مرحلة بالقمع لتصفية جدول العملاء فوراً</span>
           </div>
         </div>
       </div>
@@ -1023,11 +1024,16 @@ async function generatePerfectPortal() {
         
         <!-- Chart 1: Lead Flow Timeline -->
         <div class="glass-card p-4 sm:p-5 rounded-2xl lg:col-span-2">
-          <div class="flex items-center justify-between mb-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
             <h3 class="text-xs sm:text-sm font-bold text-[#c5a059] flex items-center gap-2">
-              <i class="fa-solid fa-chart-area"></i> مسار تدفق الليدات اليومي (Daily Lead Flow)
+              <i class="fa-solid fa-chart-area"></i> <span id="timelineTitleText">مسار تدفق الليدات اليومي (Daily Lead Flow)</span>
             </h3>
-            <span class="text-[11px] text-slate-400 font-mono">Live Timeline</span>
+            <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+              <span class="text-[10px] text-slate-400 px-1 font-bold">التجميع:</span>
+              <button onclick="setLeadsGranularity('DAILY')" id="btnLeadsGranDaily" class="px-2.5 py-1 rounded-lg bg-[#c5a059] text-black font-bold text-[11px] transition shadow-sm">يومي (Daily)</button>
+              <button onclick="setLeadsGranularity('WEEKLY')" id="btnLeadsGranWeekly" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white font-bold text-[11px] transition">أسبوعي (Weekly)</button>
+              <button onclick="setLeadsGranularity('MONTHLY')" id="btnLeadsGranMonthly" class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white font-bold text-[11px] transition">شهري (Monthly)</button>
+            </div>
           </div>
           <div id="chartTimeline" class="w-full"></div>
         </div>
@@ -1354,6 +1360,7 @@ async function generatePerfectPortal() {
     
     let leadsStartDate = '2026-07-22';
     let leadsEndDate = getTodayISO();
+    let leadsGranularity = 'DAILY';
     let campStartDate = '2026-07-22';
     let campEndDate = getTodayISO();
 
@@ -2255,6 +2262,7 @@ async function generatePerfectPortal() {
       if (fLost) fLost.innerText = closedLost;
       if (fScan) fScan.innerText = meetings;
       if (fScanRate) fScanRate.innerText = qual > 0 ? ((meetings / qual) * 100).toFixed(1) + '% من المؤهلين' : '0%';
+      if (fDeals) fDeals.innerText = deals;
       if (fCloseRate) {
         if (meetings > 0 && deals <= meetings) {
           fCloseRate.innerText = ((deals / meetings) * 100).toFixed(1) + '% إغلاق المعاينات';
@@ -2274,20 +2282,66 @@ async function generatePerfectPortal() {
       }
     }
 
+    function setLeadsGranularity(gran) {
+      leadsGranularity = gran;
+      ['btnLeadsGranDaily', 'btnLeadsGranWeekly', 'btnLeadsGranMonthly'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.className = 'px-2.5 py-1 rounded-lg text-slate-400 hover:text-white font-bold text-[11px] transition';
+      });
+      const activeBtn = document.getElementById(gran === 'DAILY' ? 'btnLeadsGranDaily' : (gran === 'WEEKLY' ? 'btnLeadsGranWeekly' : 'btnLeadsGranMonthly'));
+      if (activeBtn) {
+        activeBtn.className = 'px-2.5 py-1 rounded-lg bg-[#c5a059] text-black font-bold text-[11px] transition shadow-sm';
+      }
+      const titleEl = document.getElementById('timelineTitleText');
+      if (titleEl) {
+        if (gran === 'DAILY') titleEl.innerText = 'مسار تدفق الليدات اليومي (Daily Lead Flow)';
+        else if (gran === 'WEEKLY') titleEl.innerText = 'مسار تدفق الليدات الأسبوعي (Weekly Lead Flow)';
+        else if (gran === 'MONTHLY') titleEl.innerText = 'مسار تدفق الليدات الشهري (Monthly Lead Flow)';
+      }
+      renderLeadsCharts();
+    }
+
     function renderLeadsCharts() {
       const isMobile = window.innerWidth < 640;
+      const monthNamesAr = {
+        '01': 'يناير', '02': 'فبراير', '03': 'مارس', '04': 'أبريل',
+        '05': 'مايو', '06': 'يونيو', '07': 'يوليو', '08': 'أغسطس',
+        '09': 'سبتمبر', '10': 'أكتوبر', '11': 'نوفمبر', '12': 'ديسمبر'
+      };
 
-      // 1. Timeline Chart (Daily Incoming Leads with whole integers)
+      // 1. Timeline Chart (Incoming Leads with whole integers & dynamic granularity)
       const dateMap = {};
       filteredLeads.forEach(l => {
         if (!l.date) return;
-        dateMap[l.date] = (dateMap[l.date] || 0) + 1;
+        let key = l.date;
+        if (leadsGranularity === 'WEEKLY') {
+          const dt = new Date(l.date);
+          if (!isNaN(dt.getTime())) {
+            const day = dt.getDay(); // 0 is Sunday, 6 is Saturday
+            const diff = (day + 1) % 7; // distance from previous Saturday
+            const sat = new Date(dt);
+            sat.setDate(dt.getDate() - diff);
+            const y = sat.getFullYear();
+            const m = String(sat.getMonth() + 1).padStart(2, '0');
+            const d = String(sat.getDate()).padStart(2, '0');
+            key = y + '-' + m + '-' + d;
+          }
+        } else if (leadsGranularity === 'MONTHLY') {
+          key = l.date.slice(0, 7); // YYYY-MM
+        }
+        dateMap[key] = (dateMap[key] || 0) + 1;
       });
+
       const sortedDates = Object.keys(dateMap).sort();
       const counts = sortedDates.map(d => dateMap[d]);
       const maxVal = counts.length > 0 ? Math.max(...counts) : 10;
+
+      let seriesName = 'Incoming Leads (الليدات اليومية)';
+      if (leadsGranularity === 'WEEKLY') seriesName = 'Incoming Leads (الليدات الأسبوعية)';
+      if (leadsGranularity === 'MONTHLY') seriesName = 'Incoming Leads (الليدات الشهرية)';
+
       const tOpts = {
-        series: [{ name: 'Incoming Leads (الليدات اليومية)', data: counts }],
+        series: [{ name: seriesName, data: counts }],
         chart: {
           type: 'area',
           height: isMobile ? 220 : 250,
@@ -2304,12 +2358,24 @@ async function generatePerfectPortal() {
           categories: sortedDates,
           labels: {
             style: { colors: '#94a3b8', fontSize: '10px' },
-            rotate: -45,
+            rotate: leadsGranularity === 'MONTHLY' ? 0 : -45,
             hideOverlappingLabels: true,
             formatter: (val) => {
               if (!val) return '';
+              if (leadsGranularity === 'MONTHLY') {
+                const parts = val.split('-');
+                if (parts.length === 2) {
+                  return (monthNamesAr[parts[1]] || parts[1]) + ' ' + parts[0];
+                }
+                return val;
+              }
               const parts = val.split('-');
-              if (parts.length === 3) return parts[2] + '/' + parts[1];
+              if (parts.length === 3) {
+                if (leadsGranularity === 'WEEKLY') {
+                  return 'أسبوع ' + parts[2] + '/' + parts[1];
+                }
+                return parts[2] + '/' + parts[1];
+              }
               return val;
             }
           },
@@ -2326,7 +2392,23 @@ async function generatePerfectPortal() {
         },
         tooltip: {
           theme: 'dark',
-          x: { formatter: (val, opts) => sortedDates[opts.dataPointIndex] || val },
+          x: {
+            formatter: (val, opts) => {
+              const k = sortedDates[opts.dataPointIndex] || val;
+              if (!k) return '';
+              if (leadsGranularity === 'MONTHLY') {
+                const parts = k.split('-');
+                return 'شهر ' + (monthNamesAr[parts[1]] || parts[1]) + ' ' + parts[0];
+              }
+              if (leadsGranularity === 'WEEKLY') {
+                const parts = k.split('-');
+                if (parts.length === 3) {
+                  return 'الأسبوع من ' + parts[2] + '/' + parts[1] + '/' + parts[0];
+                }
+              }
+              return k;
+            }
+          },
           y: { formatter: (v) => v + ' ليد' }
         },
         grid: { borderColor: '#1e293b' },
