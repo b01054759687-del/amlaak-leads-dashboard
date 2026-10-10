@@ -3,7 +3,7 @@ const https = require('https');
 const fs = require('fs');
 
 const SHEET_ID = '1S1a3OH6U-7nySBxNRqzBL83CEXEjRZDFEMWC2kUepFA';
-const tabs = ['Sheet25', 'Sheet26', 'Sheet27', 'Form 1/9/2026-copy', 'Form 7-9-2026', 'Form SA 8-9-2026 ( No Conditional Logic )'];
+const tabs = ['Sheet25', 'Sheet26', 'Sheet27', 'Form 1/9/2026-copy', 'Form 7-9-2026', 'Form SA 8-9-2026 ( No Conditional Logic )', 'Messages'];
 
 // GID map — use export?format=csv&gid=GID which bypasses ALL Google Sheets UI filters
 const SHEET_GID_MAP = {
@@ -13,6 +13,7 @@ const SHEET_GID_MAP = {
   'Form 1/9/2026-copy': '1471405191',
   'Form 7-9-2026': '131674355',
   'Form SA 8-9-2026 ( No Conditional Logic )': '1144296013',
+  'Messages': '1632651738',
   'Meta_Spend_Daily': '1688475147'
 };
 
@@ -152,15 +153,73 @@ function cleanText(val) {
 
 function parseDateStr(dt) {
   if (!dt) return '';
-  const m = String(dt).match(/(\d{4}-\d{2}-\d{2})/);
-  return m ? m[1] : '';
+  let str = String(dt).trim();
+  // 1. ISO format: 2026-08-18 or 2026/08/18
+  let m = str.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (m) {
+    return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
+  }
+  // 2. Day-Month-Year or Month-Day-Year: 18-8-2026 or 9/28/2026
+  m = str.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if (m) {
+    let p1 = parseInt(m[1], 10);
+    let p2 = parseInt(m[2], 10);
+    let y = m[3];
+    let day = p1;
+    let month = p2;
+    if (p1 <= 12 && p2 > 12) {
+      month = p1;
+      day = p2;
+    }
+    return `${y}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+  return '';
+}
+
+function extractDateFromNote(note) {
+  if (!note) return '';
+  const m = String(note).match(/\b(\d{1,2})[-/](\d{1,2})\b/);
+  if (m) {
+    let d = parseInt(m[1], 10);
+    let mo = parseInt(m[2], 10);
+    if (mo >= 7 && mo <= 12 && d >= 1 && d <= 31) {
+      return `2026-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
+  }
+  return '';
+}
+
+function normalizePhone(raw) {
+  if (!raw) return '-';
+  let str = String(raw).trim().replace(/^p:/i, '').trim();
+  str = str.replace(/[\s\-\(\)]/g, '');
+  const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+  for (let i = 0; i < 10; i++) {
+    str = str.split(arabicDigits[i]).join(i);
+  }
+  let clean = str.replace(/[^0-9+]/g, '');
+  if (!clean) return '-';
+  if (clean.startsWith('+')) return clean;
+  if (clean.startsWith('00')) return '+' + clean.slice(2);
+  if (clean.startsWith('966')) return '+' + clean;
+  if (clean.startsWith('20')) return '+' + clean;
+  if (clean.startsWith('01') && clean.length === 11) return '+2' + clean;
+  if (/^1[0125]\d{8}$/.test(clean)) return '+20' + clean;
+  return clean;
+}
+
+function detectCountry(phone) {
+  if (!phone || phone === '-') return 'Egypt (مصر)';
+  if (phone.includes('+966') || phone.includes('966')) return 'KSA (السعودية)';
+  if (phone.includes('+20') || phone.includes('20') || phone.includes('01')) return 'Egypt (مصر)';
+  return 'Gulf / Other';
 }
 
 function cleanCondition(cond) {
   if (!cond) return 'Unspecified';
-  if (cond.includes('semi-finished') || cond.includes('نصف_تشطيب') || cond.includes('نصف تشطيب')) return 'Semi-Finished (نصف تشطيب)';
-  if (cond.includes('fully_finished') || cond.includes('متشطبة_بالفعل') || cond.includes('متشطبة')) return 'Fully Finished (متشطبة)';
-  if (cond.includes('red_brick') || cond.includes('الطوب_الأحمر') || cond.includes('طوب أحمر')) return 'Core & Shell (طوب أحمر)';
+  if (cond.includes('semi-finished') || cond.includes('نصف_تشطيب') || cond.includes('نصف تشطيب') || cond.includes('نص تشطيب')) return 'Semi-Finished (نصف تشطيب)';
+  if (cond.includes('fully_finished') || cond.includes('متشطبة_بالفعل') || cond.includes('متشطبة') || cond.includes('اعادة تشطيب')) return 'Fully Finished (متشطبة)';
+  if (cond.includes('red_brick') || cond.includes('الطوب_الأحمر') || cond.includes('طوب أحمر') || cond.includes('طوب احمر')) return 'Core & Shell (طوب أحمر)';
   return cond.replace(/\(.*?\)/g, '').replace(/_/g, ' ').trim() || 'Unspecified';
 }
 
@@ -260,24 +319,47 @@ async function generatePerfectPortal() {
     const campIdx = headers.findIndex(h => h === 'campaign_name');
     const condIdx = headers.findIndex(h => h.includes('condition') || h.includes('حالة'));
     const areaIdx = headers.findIndex(h => h.includes('area') || h.includes('مساحة'));
-    const locIdx = headers.findIndex(h => h.includes('unit_location') || h.includes('government') || h.includes('محافظة'));
+    
+    // Priority: unit_location first, fallback to government
+    let locIdx = rawHeaders.findIndex(h => /unit_location|موقع_الوحدة|موقع_العقار/i.test(h));
+    const govIdx = rawHeaders.findIndex(h => /government|محافظة/i.test(h));
+    if (locIdx === -1 && govIdx !== -1) locIdx = govIdx;
+
     const nameIdx = headers.findIndex(h => h === 'full_name' || (h.includes('name') && !h.includes('ad') && !h.includes('campaign') && !h.includes('form') && !h.includes('set') && !h.includes('owner')));
     const phoneIdx = headers.findIndex(h => h.includes('phone') || h.includes('هاتف') || h.includes('mobile'));
     const statusIdx = headers.findIndex(h => h === 'lead_status' || h === 'status');
+    const deadIdx = rawHeaders.findIndex(h => /dead|lost/i.test(h));
     const notesIdx = headers.findIndex(h => h === 'note' || h === 'notes');
     const ownerIdx = headers.findIndex(h => h.includes('owner') || h.includes('agent') || h.includes('assign'));
-    const meetingIdx = headers.findIndex(h => h.includes('scanning') || h.includes('meeting'));
-    const dealIdx = headers.findIndex(h => h.includes('deal') || h.includes('تعاقد'));
+    const meetingIdx = rawHeaders.findIndex(h => /scanning|meeting|معاين/i.test(h));
+    const dealIdx = rawHeaders.findIndex(h => /deal|تعاقد/i.test(h));
 
     const hiddenRows = extractHiddenRows(rawHeaders);
     const allRows = [...hiddenRows, ...rows.slice(1)];
 
-    allRows.forEach((r) => {
+    allRows.forEach((r, rowIdx) => {
       if (r.every(c => !c || c.trim() === '')) return;
-      const id = idIdx !== -1 ? cleanText(r[idIdx]) : '';
+
+      const rawPhone = phoneIdx !== -1 ? cleanText(r[phoneIdx]) : '';
+      const phone = normalizePhone(rawPhone);
       const name = nameIdx !== -1 ? cleanText(r[nameIdx]) : '';
-      const phone = phoneIdx !== -1 ? cleanText(r[phoneIdx]) : '';
+      if (!name && phone === '-') return;
+
+      let id = idIdx !== -1 ? cleanText(r[idIdx]) : '';
+      if (!id && tab === 'Messages') {
+        id = `msg_${phone.replace(/\D/g, '') || (rowIdx + 1)}`;
+      }
+
       const rawCreated = createdIdx !== -1 ? cleanText(r[createdIdx]) : '';
+      let dateFormatted = parseDateStr(rawCreated);
+      const notes = notesIdx !== -1 ? cleanText(r[notesIdx]) : '-';
+      const meetingDate = meetingIdx !== -1 ? parseDateStr(cleanText(r[meetingIdx])) : '';
+      const dealDate = dealIdx !== -1 ? parseDateStr(cleanText(r[dealIdx])) : '';
+
+      if (!dateFormatted && tab === 'Messages') {
+        dateFormatted = extractDateFromNote(notes) || meetingDate || dealDate || '2026-10-05';
+      }
+
       let adId = adIdIdx !== -1 ? cleanText(r[adIdIdx]) : '';
       let adName = adIdx !== -1 ? cleanText(r[adIdx]) : '';
       let adsetId = adsetIdIdx !== -1 ? cleanText(r[adsetIdIdx]) : '';
@@ -285,21 +367,34 @@ async function generatePerfectPortal() {
       let campaignId = campIdIdx !== -1 ? cleanText(r[campIdIdx]) : '';
       let campaignName = campIdx !== -1 ? cleanText(r[campIdx]) : '';
 
-      if (!adName) adName = 'General Ad';
-      if (!campaignName) campaignName = (tab === 'Sheet25' || tab === 'Form 1/9/2026-copy' || tab === 'Form 7-9-2026') ? 'Cost Plus Campaign' : (tab === 'Sheet26' ? 'Expatriates Campaign' : 'Your Time is Precious');
+      if (tab === 'Messages') {
+        adName = 'Direct Messages Lead';
+        adsetName = 'Messages Ad Set';
+        campaignName = 'Meta Messages Campaign (حملات الرسائل)';
+        adId = 'msg_ad_01';
+        adsetId = 'msg_adset_01';
+        campaignId = 'msg_camp_01';
+      } else {
+        if (!adName) adName = 'General Ad';
+        if (!campaignName) campaignName = (tab === 'Sheet25' || tab === 'Form 1/9/2026-copy' || tab === 'Form 7-9-2026') ? 'Cost Plus Campaign' : (tab === 'Sheet26' ? 'Expatriates Campaign' : 'Your Time is Precious');
+      }
 
       const cond = condIdx !== -1 ? cleanCondition(cleanText(r[condIdx])) : 'Unspecified';
       const areaInfo = areaIdx !== -1 ? parseArea(cleanText(r[areaIdx])) : { areaNum: 0, areaCat: 'Unspecified' };
-      const loc = locIdx !== -1 ? cleanText(r[locIdx]) : 'القاهرة / الجيزة';
+      
+      let loc = locIdx !== -1 ? cleanText(r[locIdx]) : '';
+      if ((!loc || loc.length < 2) && govIdx !== -1) {
+        loc = cleanText(r[govIdx]);
+      }
+      loc = loc.replace(/\(.*?\)/g, '').replace(/_/g, ' ').trim() || 'القاهرة / الجيزة';
+
       const status = statusIdx !== -1 ? cleanText(r[statusIdx]) : 'No Answer';
-      const notes = notesIdx !== -1 ? cleanText(r[notesIdx]) : '-';
+      const deadStatus = deadIdx !== -1 ? cleanText(r[deadIdx]) : '-';
+
       let owner = ownerIdx !== -1 ? cleanText(r[ownerIdx]) : 'Unassigned';
       if (owner.includes('|') || owner.includes('Lead Form')) owner = 'Unassigned';
 
-      const dateFormatted = parseDateStr(rawCreated);
-      const meetingDate = meetingIdx !== -1 ? parseDateStr(cleanText(r[meetingIdx])) : '';
-      const dealDate = dealIdx !== -1 ? parseDateStr(cleanText(r[dealIdx])) : '';
-      const country = phone.startsWith('+966') || phone.startsWith('966') ? 'KSA (السعودية)' : (phone.startsWith('+20') || phone.startsWith('20') || phone.startsWith('01') ? 'Egypt (مصر)' : 'Gulf / Other');
+      const country = detectCountry(phone);
 
       strictLeadsList.push({
         id,
@@ -317,8 +412,9 @@ async function generatePerfectPortal() {
         areaNum: areaInfo.areaNum,
         areaCategory: areaInfo.areaCat,
         condition: cond,
-        location: loc || 'القاهرة / الجيزة',
+        location: loc,
         status: status || 'No Answer',
+        deadStatus: deadStatus || '-',
         owner: owner || 'Unassigned',
         notes: notes || '-',
         meetingDate,
@@ -618,11 +714,13 @@ async function generatePerfectPortal() {
           </div>
 
           <!-- Date Presets -->
-          <div class="grid grid-cols-4 sm:flex items-center gap-1.5 w-full lg:w-auto">
-            <button onclick="setLeadsDatePreset('ALL')" id="btnDateAll" class="px-3 py-1.5 rounded-xl bg-[#c5a059] text-[#0b192c] font-black text-[11px] text-center transition shadow-sm">All Time</button>
-            <button onclick="setLeadsDatePreset('JULY')" id="btnDateJuly" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">July 2026</button>
-            <button onclick="setLeadsDatePreset('AUG')" id="btnDateAug" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">August 2026</button>
-            <button onclick="setLeadsDatePreset('LAST7')" id="btnDateLast7" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">Last 7 Days</button>
+          <div class="grid grid-cols-3 sm:flex items-center gap-1.5 w-full lg:w-auto flex-wrap">
+            <button onclick="setLeadsDatePreset('ALL')" id="btnDateAll" class="px-2.5 py-1.5 rounded-xl bg-[#c5a059] text-[#0b192c] font-black text-[11px] text-center transition shadow-sm">All Time</button>
+            <button onclick="setLeadsDatePreset('JULY')" id="btnDateJuly" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">July</button>
+            <button onclick="setLeadsDatePreset('AUG')" id="btnDateAug" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">August</button>
+            <button onclick="setLeadsDatePreset('SEPT')" id="btnDateSept" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">Sept</button>
+            <button onclick="setLeadsDatePreset('OCT')" id="btnDateOct" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">October</button>
+            <button onclick="setLeadsDatePreset('LAST7')" id="btnDateLast7" class="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-[#c5a059] text-[11px] text-slate-300 font-semibold text-center transition">Last 7 Days</button>
           </div>
         </div>
 
@@ -652,11 +750,11 @@ async function generatePerfectPortal() {
           </div>
         </div>
 
-        <!-- Row 3: Dropdown Selectors (Status, Agent, Condition, Country, Search) -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 pt-3 border-t border-slate-800">
+        <!-- Row 3: Dropdown Selectors (Status, Dead Status, Agent, Condition, Country, Search) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 pt-3 border-t border-slate-800">
           <div>
             <label class="block text-[10px] text-slate-400 mb-1 font-bold">الحالة (Status):</label>
-            <select id="statusFilter" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-[#c5a059]" onchange="applyLeadsFilters()">
+            <select id="statusFilter" class="w-full px-2 py-1.5 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-[#c5a059]" onchange="applyLeadsFilters()">
               <option value="ALL">كل الحالات (All)</option>
               <option value="Qualified">Qualified ✅</option>
               <option value="Not Qualified">Not Qualified ❌</option>
@@ -666,9 +764,19 @@ async function generatePerfectPortal() {
           </div>
 
           <div>
+            <label class="block text-[10px] text-slate-400 mb-1 font-bold">المرحلة (Dead Status):</label>
+            <select id="deadStatusFilter" class="w-full px-2 py-1.5 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-[#c5a059]" onchange="applyLeadsFilters()">
+              <option value="ALL">كل المراحل</option>
+              <option value="Closed Lost">Closed Lost 🚫</option>
+              <option value="Discovery">Discovery 🔍</option>
+              <option value="Assess Project">Assess Project 📐</option>
+            </select>
+          </div>
+
+          <div>
             <label class="block text-[10px] text-slate-400 mb-1 font-bold">مسؤول المبيعات (Agent):</label>
-            <select id="ownerFilter" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-[#c5a059]" onchange="applyLeadsFilters()">
-              <option value="ALL">كل المسؤولين (All)</option>
+            <select id="ownerFilter" class="w-full px-2 py-1.5 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-[#c5a059]" onchange="applyLeadsFilters()">
+              <option value="ALL">كل المسؤولين</option>
               <option value="Mariam">Mariam</option>
               <option value="Shahd">Shahd</option>
             </select>
@@ -676,7 +784,7 @@ async function generatePerfectPortal() {
 
           <div>
             <label class="block text-[10px] text-slate-400 mb-1 font-bold">حالة الوحدة (Condition):</label>
-            <select id="conditionFilter" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-[#c5a059]" onchange="applyLeadsFilters()">
+            <select id="conditionFilter" class="w-full px-2 py-1.5 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-[#c5a059]" onchange="applyLeadsFilters()">
               <option value="ALL">كل حالات الوحدات</option>
               <option value="Semi-Finished">Semi-Finished (نصف تشطيب)</option>
               <option value="Core & Shell">Core & Shell (طوب أحمر)</option>
@@ -686,7 +794,7 @@ async function generatePerfectPortal() {
 
           <div>
             <label class="block text-[10px] text-slate-400 mb-1 font-bold">الدولة (Country):</label>
-            <select id="countryFilter" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-[#c5a059]" onchange="applyLeadsFilters()">
+            <select id="countryFilter" class="w-full px-2 py-1.5 rounded-xl bg-[#0b192c] border border-slate-700 text-xs text-slate-300 focus:outline-none focus:border-[#c5a059]" onchange="applyLeadsFilters()">
               <option value="ALL">كل الدول</option>
               <option value="Egypt">Egypt (مصر)</option>
               <option value="KSA">KSA (السعودية)</option>
@@ -1078,7 +1186,8 @@ async function generatePerfectPortal() {
       { name: 'Sheet27', gid: '193385057' },
       { name: 'Form 1/9/2026-copy', gid: '1471405191' },
       { name: 'Form 7-9-2026', gid: '131674355' },
-      { name: 'Form SA 8-9-2026 ( No Conditional Logic )', gid: '1144296013' }
+      { name: 'Form SA 8-9-2026 ( No Conditional Logic )', gid: '1144296013' },
+      { name: 'Messages', gid: '1632651738' }
     ];
 
     // Strict Baseline datasets directly parsed from sheets
@@ -1275,9 +1384,9 @@ async function generatePerfectPortal() {
 
     function cleanCondition(cond) {
       if (!cond) return 'Unspecified';
-      if (cond.includes('semi-finished') || cond.includes('نصف_تشطيب') || cond.includes('نصف تشطيب')) return 'Semi-Finished (نصف تشطيب)';
-      if (cond.includes('fully_finished') || cond.includes('متشطبة_بالفعل') || cond.includes('متشطبة')) return 'Fully Finished (متشطبة)';
-      if (cond.includes('red_brick') || cond.includes('الطوب_الأحمر') || cond.includes('طوب أحمر')) return 'Core & Shell (طوب أحمر)';
+      if (cond.includes('semi-finished') || cond.includes('نصف_تشطيب') || cond.includes('نصف تشطيب') || cond.includes('نص تشطيب')) return 'Semi-Finished (نصف تشطيب)';
+      if (cond.includes('fully_finished') || cond.includes('متشطبة_بالفعل') || cond.includes('متشطبة') || cond.includes('اعادة تشطيب')) return 'Fully Finished (متشطبة)';
+      if (cond.includes('red_brick') || cond.includes('الطوب_الأحمر') || cond.includes('طوب أحمر') || cond.includes('طوب احمر')) return 'Core & Shell (طوب أحمر)';
       return cond.replace(/\\(.*?\\)/g, '').replace(/_/g, ' ').trim() || 'Unspecified';
     }
 
@@ -1314,8 +1423,64 @@ async function generatePerfectPortal() {
 
     function parseDateStr(dt) {
       if (!dt) return '';
-      const m = String(dt).match(/(\\d{4}-\\d{2}-\\d{2})/);
-      return m ? m[1] : '';
+      let str = String(dt).trim();
+      let m = str.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+      if (m) {
+        return m[1] + '-' + String(m[2]).padStart(2, '0') + '-' + String(m[3]).padStart(2, '0');
+      }
+      m = str.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+      if (m) {
+        let p1 = parseInt(m[1], 10);
+        let p2 = parseInt(m[2], 10);
+        let y = m[3];
+        let day = p1;
+        let month = p2;
+        if (p1 <= 12 && p2 > 12) {
+          month = p1;
+          day = p2;
+        }
+        return y + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+      }
+      return '';
+    }
+
+    function extractDateFromNote(note) {
+      if (!note) return '';
+      const m = String(note).match(/\b(\d{1,2})[-/](\d{1,2})\b/);
+      if (m) {
+        let d = parseInt(m[1], 10);
+        let mo = parseInt(m[2], 10);
+        if (mo >= 7 && mo <= 12 && d >= 1 && d <= 31) {
+          return '2026-' + String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        }
+      }
+      return '';
+    }
+
+    function normalizePhone(raw) {
+      if (!raw) return '-';
+      let str = String(raw).trim().replace(/^p:/i, '').trim();
+      str = str.replace(/[\\s\\-\\(\\)]/g, '');
+      const arabicDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+      for (let i = 0; i < 10; i++) {
+        str = str.split(arabicDigits[i]).join(i);
+      }
+      let clean = str.replace(/[^0-9+]/g, '');
+      if (!clean) return '-';
+      if (clean.startsWith('+')) return clean;
+      if (clean.startsWith('00')) return '+' + clean.slice(2);
+      if (clean.startsWith('966')) return '+' + clean;
+      if (clean.startsWith('20')) return '+' + clean;
+      if (clean.startsWith('01') && clean.length === 11) return '+2' + clean;
+      if (/^1[0125]\\d{8}$/.test(clean)) return '+20' + clean;
+      return clean;
+    }
+
+    function detectCountry(phone) {
+      if (!phone || phone === '-') return 'Egypt (مصر)';
+      if (phone.includes('+966') || phone.includes('966')) return 'KSA (السعودية)';
+      if (phone.includes('+20') || phone.includes('20') || phone.includes('01')) return 'Egypt (مصر)';
+      return 'Gulf / Other';
     }
 
     function extractHiddenRowsClient(headerRow) {
@@ -1433,24 +1598,47 @@ async function generatePerfectPortal() {
             const campIdx = headers.findIndex(h => h === 'campaign_name');
             const condIdx = headers.findIndex(h => h.includes('condition') || h.includes('حالة'));
             const areaIdx = headers.findIndex(h => h.includes('area') || h.includes('مساحة'));
-            const locIdx = headers.findIndex(h => h.includes('unit_location') || h.includes('government') || h.includes('محافظة'));
+            
+            // Priority: unit_location first, fallback to government
+            let locIdx = rawHeaders.findIndex(h => /unit_location|موقع_الوحدة|موقع_العقار/i.test(h));
+            const govIdx = rawHeaders.findIndex(h => /government|محافظة/i.test(h));
+            if (locIdx === -1 && govIdx !== -1) locIdx = govIdx;
+
             const nameIdx = headers.findIndex(h => h === 'full_name' || (h.includes('name') && !h.includes('ad') && !h.includes('campaign') && !h.includes('form') && !h.includes('set') && !h.includes('owner')));
             const phoneIdx = headers.findIndex(h => h.includes('phone') || h.includes('هاتف') || h.includes('mobile'));
             const statusIdx = headers.findIndex(h => h === 'lead_status' || h === 'status');
+            const deadIdx = rawHeaders.findIndex(h => /dead|lost/i.test(h));
             const notesIdx = headers.findIndex(h => h === 'note' || h === 'notes');
             const ownerIdx = headers.findIndex(h => h.includes('owner') || h.includes('agent') || h.includes('assign'));
-            const meetingIdx = headers.findIndex(h => h.includes('scanning') || h.includes('meeting'));
-            const dealIdx = headers.findIndex(h => h.includes('deal') || h.includes('تعاقد'));
+            const meetingIdx = rawHeaders.findIndex(h => /scanning|meeting|معاين/i.test(h));
+            const dealIdx = rawHeaders.findIndex(h => /deal|تعاقد/i.test(h));
 
             const hiddenRows = extractHiddenRowsClient(rawHeaders);
             const allRows = [...hiddenRows, ...rows.slice(1)];
 
-            allRows.forEach((r) => {
+            allRows.forEach((r, rowIdx) => {
               if (r.every(c => !c || c.trim() === '')) return;
-              const id = idIdx !== -1 ? cleanText(r[idIdx]) : '';
+
+              const rawPhone = phoneIdx !== -1 ? cleanText(r[phoneIdx]) : '';
+              const phone = normalizePhone(rawPhone);
               const name = nameIdx !== -1 ? cleanText(r[nameIdx]) : '';
-              const phone = phoneIdx !== -1 ? cleanText(r[phoneIdx]) : '';
+              if (!name && phone === '-') return;
+
+              let id = idIdx !== -1 ? cleanText(r[idIdx]) : '';
+              if (!id && tab.name === 'Messages') {
+                id = 'msg_' + (phone.replace(/\D/g, '') || (rowIdx + 1));
+              }
+
               const rawCreated = createdIdx !== -1 ? cleanText(r[createdIdx]) : '';
+              let dateFormatted = parseDateStr(rawCreated);
+              const notes = notesIdx !== -1 ? cleanText(r[notesIdx]) : '-';
+              const meetingDate = meetingIdx !== -1 ? parseDateStr(cleanText(r[meetingIdx])) : '';
+              const dealDate = dealIdx !== -1 ? parseDateStr(cleanText(r[dealIdx])) : '';
+
+              if (!dateFormatted && tab.name === 'Messages') {
+                dateFormatted = extractDateFromNote(notes) || meetingDate || dealDate || '2026-10-05';
+              }
+
               let adId = adIdIdx !== -1 ? cleanText(r[adIdIdx]) : '';
               let adName = adIdx !== -1 ? cleanText(r[adIdx]) : '';
               let adsetId = adsetIdIdx !== -1 ? cleanText(r[adsetIdIdx]) : '';
@@ -1458,26 +1646,38 @@ async function generatePerfectPortal() {
               let campaignId = campIdIdx !== -1 ? cleanText(r[campIdIdx]) : '';
               let campaignName = campIdx !== -1 ? cleanText(r[campIdx]) : '';
 
-              if (!adName && adId && metaAdMap[adId]) adName = metaAdMap[adId];
-              if (!adsetName && adsetId && metaAdsetMap[adsetId]) adsetName = metaAdsetMap[adsetId];
-              if (!campaignName && campaignId && metaCampMap[campaignId]) campaignName = metaCampMap[campaignId];
+              if (tab.name === 'Messages') {
+                adName = 'Direct Messages Lead';
+                adsetName = 'Messages Ad Set';
+                campaignName = 'Meta Messages Campaign (حملات الرسائل)';
+                adId = 'msg_ad_01';
+                adsetId = 'msg_adset_01';
+                campaignId = 'msg_camp_01';
+              } else {
+                if (!adName && adId && metaAdMap[adId]) adName = metaAdMap[adId];
+                if (!adsetName && adsetId && metaAdsetMap[adsetId]) adsetName = metaAdsetMap[adsetId];
+                if (!campaignName && campaignId && metaCampMap[campaignId]) campaignName = metaCampMap[campaignId];
 
-              if (!adName) adName = 'General Ad';
-              if (!campaignName) campaignName = (tab.name === 'Sheet25' || tab.name === 'Form 1/9/2026-copy' || tab.name === 'Form 7-9-2026') ? 'Cost Plus Campaign' : (tab.name === 'Sheet26' ? 'Expatriates Campaign' : 'Your Time is Precious');
+                if (!adName) adName = 'General Ad';
+                if (!campaignName) campaignName = (tab.name === 'Sheet25' || tab.name === 'Form 1/9/2026-copy' || tab.name === 'Form 7-9-2026') ? 'Cost Plus Campaign' : (tab.name === 'Sheet26' ? 'Expatriates Campaign' : 'Your Time is Precious');
+              }
 
               const cond = condIdx !== -1 ? cleanCondition(cleanText(r[condIdx])) : 'Unspecified';
               const areaInfo = areaIdx !== -1 ? parseArea(cleanText(r[areaIdx])) : { areaNum: 0, areaCat: 'Unspecified' };
-              const loc = locIdx !== -1 ? cleanText(r[locIdx]) : 'القاهرة / الجيزة';
+              
+              let loc = locIdx !== -1 ? cleanText(r[locIdx]) : '';
+              if ((!loc || loc.length < 2) && govIdx !== -1) {
+                loc = cleanText(r[govIdx]);
+              }
+              loc = loc.replace(/\\(.*?\\)/g, '').replace(/_/g, ' ').trim() || 'القاهرة / الجيزة';
+
               const status = statusIdx !== -1 ? cleanText(r[statusIdx]) : 'No Answer';
-              const notes = notesIdx !== -1 ? cleanText(r[notesIdx]) : '-';
+              const deadStatus = deadIdx !== -1 ? cleanText(r[deadIdx]) : '-';
               
               let owner = ownerIdx !== -1 ? cleanText(r[ownerIdx]) : 'Unassigned';
               if (owner.includes('|') || owner.includes('Lead Form')) owner = 'Unassigned';
 
-              const dateFormatted = parseDateStr(rawCreated);
-              const meetingDate = meetingIdx !== -1 ? parseDateStr(cleanText(r[meetingIdx])) : '';
-              const dealDate = dealIdx !== -1 ? parseDateStr(cleanText(r[dealIdx])) : '';
-              const country = phone.startsWith('+966') || phone.startsWith('966') ? 'KSA (السعودية)' : (phone.startsWith('+20') || phone.startsWith('20') || phone.startsWith('01') ? 'Egypt (مصر)' : 'Gulf / Other');
+              const country = detectCountry(phone);
 
               liveList.push({
                 id,
@@ -1495,8 +1695,9 @@ async function generatePerfectPortal() {
                 areaNum: areaInfo.areaNum,
                 areaCategory: areaInfo.areaCat,
                 condition: cond,
-                location: loc || 'القاهرة / الجيزة',
+                location: loc,
                 status: status || 'No Answer',
+                deadStatus: deadStatus || '-',
                 owner: owner || 'Unassigned',
                 notes: notes || '-',
                 meetingDate,
@@ -1687,7 +1888,13 @@ async function generatePerfectPortal() {
         leadsEndDate = '2026-07-31';
       } else if (preset === 'AUG') {
         leadsStartDate = '2026-08-01';
-        leadsEndDate = todayISO.startsWith('2026-08') ? todayISO : '2026-08-31';
+        leadsEndDate = '2026-08-31';
+      } else if (preset === 'SEPT') {
+        leadsStartDate = '2026-09-01';
+        leadsEndDate = '2026-09-30';
+      } else if (preset === 'OCT') {
+        leadsStartDate = '2026-10-01';
+        leadsEndDate = todayISO;
       } else if (preset === 'LAST7') {
         const d = new Date();
         d.setDate(d.getDate() - 7);
@@ -1729,6 +1936,7 @@ async function generatePerfectPortal() {
 
     function applyLeadsFilters() {
       const st = document.getElementById('statusFilter').value;
+      const deadSt = document.getElementById('deadStatusFilter') ? document.getElementById('deadStatusFilter').value : 'ALL';
       const ow = document.getElementById('ownerFilter').value;
       const cond = document.getElementById('conditionFilter').value;
       const cntry = document.getElementById('countryFilter').value;
@@ -1743,6 +1951,7 @@ async function generatePerfectPortal() {
         if (l.date && (l.date < leadsStartDate || l.date > leadsEndDate)) return false;
         if (maxArea < 500 && l.areaNum > 0 && l.areaNum > maxArea) return false;
         if (st !== 'ALL' && l.status !== st) return false;
+        if (deadSt !== 'ALL' && (!l.deadStatus || !l.deadStatus.toLowerCase().includes(deadSt.toLowerCase()))) return false;
         if (ow !== 'ALL' && !l.owner.toLowerCase().includes(ow.toLowerCase())) return false;
         if (cond !== 'ALL' && (!l.condition || !l.condition.toLowerCase().includes(cond.toLowerCase()))) return false;
         if (cntry !== 'ALL' && (!l.country || !l.country.toLowerCase().includes(cntry.toLowerCase()))) return false;
@@ -1900,6 +2109,19 @@ async function generatePerfectPortal() {
         if (l.status === 'Not Qualified') badge = '<span class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 text-[10px] font-bold font-mono">Not Qual ❌</span>';
         if (l.status === 'CREATED') badge = '<span class="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 text-[10px] font-bold font-mono">CREATED 🆕</span>';
 
+        let deadBadge = '';
+        if (l.deadStatus && l.deadStatus !== '-') {
+          if (l.deadStatus.includes('Closed Lost')) {
+            deadBadge = '<div class="mt-1"><span class="px-2 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 whitespace-nowrap">Closed Lost 🚫</span></div>';
+          } else if (l.deadStatus.includes('Discovery')) {
+            deadBadge = '<div class="mt-1"><span class="px-2 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 whitespace-nowrap">Discovery 🔍</span></div>';
+          } else if (l.deadStatus.includes('Assess')) {
+            deadBadge = '<div class="mt-1"><span class="px-2 py-0.5 rounded text-[9px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 whitespace-nowrap">Assess 📐</span></div>';
+          } else {
+            deadBadge = '<div class="mt-1"><span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-700/50 text-slate-300 border border-slate-600 whitespace-nowrap">' + l.deadStatus + '</span></div>';
+          }
+        }
+
         let agentBadge = '<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-medium text-[10px]">Unassigned</span>';
         if (l.owner.toLowerCase().includes('mariam') || l.owner.includes('مريم')) {
           agentBadge = '<span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold text-[11px]">Mariam</span>';
@@ -1920,7 +2142,7 @@ async function generatePerfectPortal() {
           <td class="p-2.5 sm:p-3 text-slate-300 text-[11px]">\${l.condition}</td>
           <td class="p-2.5 sm:p-3 text-slate-300 text-[11px]">\${l.location}</td>
           <td class="p-2.5 sm:p-3 text-slate-300 text-[10px] font-semibold max-w-[110px] truncate font-mono" title="\${l.adName}">\${l.adName}</td>
-          <td class="p-2.5 sm:p-3">\${badge}</td>
+          <td class="p-2.5 sm:p-3">\${badge}\${deadBadge}</td>
           <td class="p-2.5 sm:p-3 font-mono text-cyan-300 font-bold text-[10px]">\${l.meetingDate || '-'}</td>
           <td class="p-2.5 sm:p-3 font-mono text-emerald-400 font-bold text-[10px]">\${l.dealDate || '-'}</td>
           <td class="p-2.5 sm:p-3">\${agentBadge}</td>
@@ -2597,9 +2819,9 @@ async function generatePerfectPortal() {
         link.download = \`Amlaak_Meta_Campaigns_\${new Date().toISOString().slice(0,10)}.csv\`;
         link.click();
       } else {
-        let csv = 'Date,Name,Phone,Country,Area,Condition,Location,Ad,Status,Scanning Date,Deal Date,Owner,Notes\\n';
+        let csv = 'Date,Name,Phone,Country,Area,Condition,Location,Ad,Status,Dead Status,Scanning Date,Deal Date,Owner,Notes\\n';
         filteredLeads.forEach(l => {
-          csv += \`"\${l.date}","\${l.name}","\${l.phone}","\${l.country}","\${l.areaNum}","\${l.condition}","\${l.location}","\${l.adName}","\${l.status}","\${l.meetingDate}","\${l.dealDate}","\${l.owner}","\${l.notes}"\\n\`;
+          csv += \`"\${l.date}","\${l.name}","\${l.phone}","\${l.country}","\${l.areaNum}","\${l.condition}","\${l.location}","\${l.adName}","\${l.status}","\${l.deadStatus || '-'}","\${l.meetingDate}","\${l.dealDate}","\${l.owner}","\${l.notes}"\\n\`;
         });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');

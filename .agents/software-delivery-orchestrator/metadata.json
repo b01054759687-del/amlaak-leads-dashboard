@@ -1,0 +1,75 @@
+{
+    "name": "software-delivery-orchestrator",
+    "displayName": "Software Delivery Orchestrator",
+    "type": "agent",
+    "category": "engineering",
+    "version": "1.0.0",
+    "status": "testing",
+    "portable": true,
+    "main_skill": "ai-workspace-delivery-governor",
+    "supported_tools": [
+        "antigravity",
+        "claude",
+        "cursor",
+        "windsurf"
+    ],
+    "identity": {
+        "role": "Official Software Engineering & Delivery Governance Agent",
+        "mission": "Govern the complete software delivery lifecycle with adaptive execution modes, layered implementation, ordered testing, and defensive approval gates.",
+        "prompt_file": "02-AI-ASSETS/agents/engineering/software-delivery-orchestrator/AGENT.md"
+    },
+    "capabilities": [
+        "adaptive-execution",
+        "code-review-governance",
+        "implementation-governance",
+        "release-deployment-governance"
+    ],
+    "permissions": {
+        "read": [
+            "00-META/*",
+            "01-FRAMEWORKS/*",
+            "02-AI-ASSETS/*",
+            "03-ADAPTERS/*",
+            "04-REGISTRY/*",
+            "05-PROMPT-LIBRARY/*",
+            "06-DOCUMENTATION/*",
+            "07-KNOWLEDGE/*",
+            "08-RELEASES/*",
+            "09-EVALUATION/*",
+            "10-ARCHIVE/*",
+            "11-INTAKE/*"
+        ],
+        "write": [
+            "02-AI-ASSETS/*",
+            "04-REGISTRY/*",
+            "08-RELEASES/*",
+            "09-EVALUATION/*"
+        ],
+        "delete": "PROHIBITED_ARCHIVE_ONLY",
+        "git_push": "APPROVAL_REQUIRED_GATE_C",
+        "external_tools_mutation": "APPROVAL_REQUIRED_GATE_A",
+        "external_resources_mutation": "APPROVAL_REQUIRED_GATE_B",
+        "test_deployment": "APPROVAL_REQUIRED_GATE_D",
+        "production_deployment": "APPROVAL_REQUIRED_GATE_E"
+    },
+    "dependencies": [
+        "ai-workspace-delivery-governor",
+        "assets-registry",
+        "tools-registry",
+        "versions-registry",
+        "adapter-registry",
+        "publishing-registry"
+    ],
+    "lifecycle": {
+        "stage": "TESTING",
+        "validation_status": "VALIDATED",
+        "last_validated": "2026-09-10T10:45:00+03:00",
+        "last_verified": "2026-09-10T10:45:00+03:00"
+    },
+    "evaluation": {
+        "status": "pending_testing_completion",
+        "test_suite": "09-EVALUATION/agent-tests/software-delivery-orchestrator/",
+        "last_run": "2026-09-10T10:45:00+03:00",
+        "score": "100%"
+    }
+}

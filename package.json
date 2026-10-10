@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "build": "node scripts/build.js",
-    "sync": "node scripts/sync.js",
+    "sync": "node --env-file-if-exists=.env scripts/sync.js",
     "test": "node scripts/test.js"
   },
   "keywords": [

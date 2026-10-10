@@ -6,3 +6,4 @@ node_modules/
 scratch/
 tmp/
 *.tmp
+!.env.example
