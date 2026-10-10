@@ -157,6 +157,12 @@ function parseDateStr(dt) {
   // 1. ISO format: 2026-08-18 or 2026/08/18
   let m = str.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
   if (m) {
+    let y = m[1];
+    let p1 = parseInt(m[2], 10);
+    let p2 = parseInt(m[3], 10);
+    if (y === '2026' && p1 < 7 && p2 >= 7 && p2 <= 12) {
+      return `${y}-${String(p2).padStart(2, '0')}-${String(p1).padStart(2, '0')}`;
+    }
     return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
   }
   // 2. Day-Month-Year or Month-Day-Year: 18-8-2026 or 9/28/2026
@@ -353,8 +359,16 @@ async function generatePerfectPortal() {
       const rawCreated = createdIdx !== -1 ? cleanText(r[createdIdx]) : '';
       let dateFormatted = parseDateStr(rawCreated);
       const notes = notesIdx !== -1 ? cleanText(r[notesIdx]) : '-';
-      const meetingDate = meetingIdx !== -1 ? parseDateStr(cleanText(r[meetingIdx])) : '';
-      const dealDate = dealIdx !== -1 ? parseDateStr(cleanText(r[dealIdx])) : '';
+      let meetingDate = meetingIdx !== -1 ? parseDateStr(cleanText(r[meetingIdx])) : '';
+      let dealDate = dealIdx !== -1 ? parseDateStr(cleanText(r[dealIdx])) : '';
+
+      if (meetingDate && dealDate && dealDate < meetingDate) {
+        const parts = dealDate.split('-');
+        if (parts.length === 3) {
+          const candidate = `${parts[0]}-${parts[2]}-${parts[1]}`;
+          if (candidate >= meetingDate) dealDate = candidate;
+        }
+      }
 
       if (!dateFormatted && tab === 'Messages') {
         dateFormatted = extractDateFromNote(notes) || meetingDate || dealDate || '2026-10-05';
@@ -871,94 +885,135 @@ async function generatePerfectPortal() {
         </div>
       </div>
 
-      <!-- FULL-FUNNEL CLOSED-LOOP CONVERSION PIPELINE SECTION -->
-      <div class="glass-card p-4 sm:p-5 rounded-2xl mb-5 border-amber-500/30">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4">
+      <!-- FULL-FUNNEL VISUAL CONVERSION PIPELINE (قمع مبيعات حقيقي متدرج مطابق للصورة) -->
+      <div class="glass-card p-5 sm:p-6 rounded-2xl mb-5 border-amber-500/30">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-5 pb-3 border-b border-slate-800">
           <div>
-            <h3 class="text-sm sm:text-base font-extrabold text-[#c5a059] flex items-center gap-2">
-              <i class="fa-solid fa-filter-circle-dollar text-amber-400"></i> مسار التحويل والمبيعات الشامل (Full-Funnel Sales Pipeline)
+            <h3 class="text-base sm:text-lg font-black text-[#c5a059] flex items-center gap-2">
+              <i class="fa-solid fa-filter text-amber-400"></i> قمع المبيعات ومسار التحويل (Sales Conversion Funnel)
             </h3>
-            <p class="text-[11px] text-slate-400 mt-0.5">متابعة حية من التسجيل والتأهيل إلى المعاينات المنعقدة والتعاقدات الموقعة (Conducted Scannings & Signed Deals)</p>
+            <p class="text-xs text-slate-400 mt-0.5">تحليل تدفق العملاء ومعدلات الانتقال بين المراحل من التسجيل حتى التعاقد النهائي (Live Inverted Pyramid Funnel)</p>
           </div>
           <div class="flex items-center gap-2">
-            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 font-mono">
-              <i class="fa-solid fa-arrow-trend-up"></i> Closed-Loop Attribution
+            <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 font-mono">
+              <i class="fa-solid fa-chart-pie"></i> Visual Pipeline
             </span>
           </div>
         </div>
 
-        <!-- 5-Stage Step Flow -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-          <!-- Step 1: All Leads -->
-          <div onclick="filterFunnelStage('ALL')" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-blue-400 cursor-pointer transition group">
-            <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold mb-1.5">
-              <span>1. إجمالي العملاء</span>
-              <i class="fa-solid fa-users text-blue-400 group-hover:scale-110 transition"></i>
-            </div>
-            <div id="funnelTotal" class="text-xl font-black text-white font-mono">-</div>
-            <div class="text-[10px] text-blue-300 mt-1 font-bold">100% Ingested Leads</div>
-            <div class="mt-2 text-[9px] text-slate-400 pt-1.5 border-t border-slate-800">قاعدة البيانات الكاملة</div>
+        <!-- Funnel Ruler Scale (0% to 100%) -->
+        <div class="max-w-3xl mx-auto mb-4 px-3 hidden sm:block">
+          <div class="flex justify-between text-[11px] text-slate-400 font-mono font-bold mb-1.5">
+            <span>0%</span>
+            <span>25%</span>
+            <span>50%</span>
+            <span>75%</span>
+            <span>100%</span>
           </div>
-
-          <!-- Step 2: Qualified -->
-          <div onclick="filterFunnelStage('QUALIFIED')" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-emerald-400 cursor-pointer transition group">
-            <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold mb-1.5">
-              <span>2. العملاء المؤهلين</span>
-              <i class="fa-solid fa-circle-check text-emerald-400 group-hover:scale-110 transition"></i>
-            </div>
-            <div id="funnelQualified" class="text-xl font-black text-emerald-400 font-mono">-</div>
-            <div id="funnelQualRate" class="text-[10px] text-emerald-300 mt-1 font-bold">0% Qualification</div>
-            <div class="mt-2 text-[9px] text-slate-400 pt-1.5 border-t border-slate-800">مطابقين لمعايير أملاك</div>
-          </div>
-
-          <!-- Step 3: Dead Status / Pipeline Stage -->
-          <div onclick="filterFunnelStage('PIPELINE')" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-purple-400 cursor-pointer transition group">
-            <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold mb-1.5">
-              <span>3. التفاوض والتقييم</span>
-              <i class="fa-solid fa-hourglass-half text-purple-400 group-hover:scale-110 transition"></i>
-            </div>
-            <div id="funnelPipeline" class="text-xl font-black text-purple-300 font-mono">-</div>
-            <div id="funnelPipelineBreakdown" class="text-[9px] text-purple-200 mt-1 font-semibold flex items-center justify-between">
-              <span>Active: <b id="funnelActiveCount">-</b></span>
-              <span>Lost: <b id="funnelLostCount" class="text-rose-400">-</b></span>
-            </div>
-            <div class="mt-2 text-[9px] text-slate-400 pt-1.5 border-t border-slate-800">Dead Status Breakdown</div>
-          </div>
-
-          <!-- Step 4: Conducted Scanning -->
-          <div onclick="filterFunnelStage('SCANNING')" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-cyan-400 cursor-pointer transition group">
-            <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold mb-1.5">
-              <span>4. المعاينات المنعقدة</span>
-              <i class="fa-solid fa-calendar-check text-cyan-400 group-hover:scale-110 transition"></i>
-            </div>
-            <div id="funnelScanning" class="text-xl font-black text-cyan-300 font-mono">-</div>
-            <div id="funnelScanningRate" class="text-[10px] text-cyan-300 mt-1 font-bold">0% of Qualified</div>
-            <div class="mt-2 text-[9px] text-slate-400 pt-1.5 border-t border-slate-800">من واقع تاريخ المعاينة</div>
-          </div>
-
-          <!-- Step 5: Signed Deals -->
-          <div onclick="filterFunnelStage('DEALS')" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 hover:border-amber-400 cursor-pointer transition group">
-            <div class="flex items-center justify-between text-slate-400 text-[11px] font-bold mb-1.5">
-              <span>5. العقود الموقعة</span>
-              <i class="fa-solid fa-file-signature text-amber-400 group-hover:scale-110 transition"></i>
-            </div>
-            <div id="funnelDeals" class="text-xl font-black text-emerald-300 font-mono">-</div>
-            <div id="funnelCloseRate" class="text-[10px] text-emerald-400 mt-1 font-bold">0% Close Rate</div>
-            <div class="mt-2 text-[9px] text-slate-400 pt-1.5 border-t border-slate-800">من واقع تاريخ التعاقد</div>
+          <div class="w-full h-2 bg-slate-900 border border-slate-800 rounded-full overflow-hidden flex">
+            <div class="w-1/4 border-r border-slate-800/80"></div>
+            <div class="w-1/4 border-r border-slate-800/80"></div>
+            <div class="w-1/4 border-r border-slate-800/80"></div>
+            <div class="w-1/4"></div>
           </div>
         </div>
 
-        <!-- Funnel Conversion Progress Bar -->
-        <div class="mt-4 pt-3 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
-          <div class="flex items-center gap-2 flex-wrap text-[11px]">
-            <span class="text-slate-400">معدل التحويل الكلي (Funnel Efficiency):</span>
-            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold font-mono" id="funnelTotalConversion">-</span>
-            <span class="text-slate-500">|</span>
-            <span class="text-slate-400">معدل إغلاق المعاينات لعقود:</span>
-            <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold font-mono" id="funnelMeetingToDealRate">-</span>
+        <!-- Centered Inverted Pyramid Funnel Tiers -->
+        <div class="max-w-3xl mx-auto flex flex-col items-center gap-3 my-2">
+          
+          <!-- Tier 1: Total Leads (100% Width) -->
+          <div class="w-full flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="filterFunnelStage('ALL')">
+            <div class="w-32 sm:w-44 text-right text-xs sm:text-sm font-bold text-slate-300 flex items-center justify-end gap-1.5">
+              <span>إجمالي العملاء</span>
+              <i class="fa-solid fa-users text-blue-400"></i>
+            </div>
+            <div class="flex-1 flex justify-center">
+              <div class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 text-white font-mono font-black text-xs sm:text-sm shadow-lg shadow-blue-900/30 flex items-center justify-between transition-all group-hover:scale-[1.01] group-hover:shadow-blue-500/20 border border-blue-400/30">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-arrow-right-to-bracket text-xs opacity-75"></i> <b id="funnelTotal">-</b></span>
+                <span class="text-[11px] sm:text-xs font-bold text-blue-100 bg-blue-900/50 px-2.5 py-0.5 rounded-lg border border-blue-300/30">100% Leads</span>
+              </div>
+            </div>
+            <div class="w-24 sm:w-32 text-left text-[10px] text-slate-400 font-medium hidden sm:block">قاعدة البيانات الكاملة</div>
           </div>
-          <div class="text-[10px] text-slate-400 italic">
-            💡 اضغط على أي بطاقة بالأعلى لتصفية جدول العملاء فوراً حسب المرحلة
+
+          <!-- Tier 2: Qualified Leads (82% Width) -->
+          <div class="w-full flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="filterFunnelStage('QUALIFIED')">
+            <div class="w-32 sm:w-44 text-right text-xs sm:text-sm font-bold text-slate-300 flex items-center justify-end gap-1.5">
+              <span>العملاء المؤهلين</span>
+              <i class="fa-solid fa-circle-check text-emerald-400"></i>
+            </div>
+            <div class="flex-1 flex justify-center">
+              <div class="w-[82%] py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 text-white font-mono font-black text-xs sm:text-sm shadow-lg shadow-cyan-900/30 flex items-center justify-between transition-all group-hover:scale-[1.01] group-hover:shadow-cyan-500/20 border border-cyan-400/30">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-star text-amber-300 text-xs"></i> <b id="funnelQualified">-</b></span>
+                <span id="funnelQualRate" class="text-[11px] sm:text-xs font-bold text-cyan-100 bg-cyan-950/50 px-2.5 py-0.5 rounded-lg border border-cyan-300/30">-</span>
+              </div>
+            </div>
+            <div class="w-24 sm:w-32 text-left text-[10px] text-slate-400 font-medium hidden sm:block">مطابقين لمعايير أملاك</div>
+          </div>
+
+          <!-- Tier 3: Active Pipeline / Evaluation (66% Width) -->
+          <div class="w-full flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="filterFunnelStage('PIPELINE')">
+            <div class="w-32 sm:w-44 text-right text-xs sm:text-sm font-bold text-slate-300 flex items-center justify-end gap-1.5">
+              <span>مرحلة التقييم والتفاوض</span>
+              <i class="fa-solid fa-hourglass-half text-purple-400"></i>
+            </div>
+            <div class="flex-1 flex justify-center">
+              <div class="w-[66%] py-3 px-4 rounded-xl bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 text-white font-mono font-black text-xs sm:text-sm shadow-lg shadow-purple-900/30 flex items-center justify-between transition-all group-hover:scale-[1.01] group-hover:shadow-purple-500/20 border border-purple-400/30">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-comments text-xs opacity-75"></i> <b id="funnelPipeline">-</b></span>
+                <span class="text-[10px] sm:text-xs font-bold text-purple-100 bg-purple-950/50 px-2 py-0.5 rounded-lg border border-purple-300/30 flex items-center gap-2">
+                  <span>Active: <b id="funnelActiveCount">-</b></span>
+                  <span class="opacity-50">|</span>
+                  <span class="text-rose-300">Lost: <b id="funnelLostCount">-</b></span>
+                </span>
+              </div>
+            </div>
+            <div class="w-24 sm:w-32 text-left text-[10px] text-slate-400 font-medium hidden sm:block">Dead Status Breakdown</div>
+          </div>
+
+          <!-- Tier 4: Conducted Scanning (50% Width) -->
+          <div class="w-full flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="filterFunnelStage('SCANNING')">
+            <div class="w-32 sm:w-44 text-right text-xs sm:text-sm font-bold text-slate-300 flex items-center justify-end gap-1.5">
+              <span>المعاينات المنعقدة</span>
+              <i class="fa-solid fa-calendar-check text-cyan-400"></i>
+            </div>
+            <div class="flex-1 flex justify-center">
+              <div class="w-[50%] py-3 px-4 rounded-xl bg-gradient-to-r from-sky-600 via-cyan-600 to-blue-600 text-white font-mono font-black text-xs sm:text-sm shadow-lg shadow-cyan-900/30 flex items-center justify-between transition-all group-hover:scale-[1.01] group-hover:shadow-cyan-500/20 border border-cyan-400/30">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-clipboard-check text-xs opacity-75"></i> <b id="funnelScanning">-</b></span>
+                <span id="funnelScanningRate" class="text-[10px] sm:text-xs font-bold text-cyan-100 bg-cyan-950/50 px-2 py-0.5 rounded-lg border border-cyan-300/30">-</span>
+              </div>
+            </div>
+            <div class="w-24 sm:w-32 text-left text-[10px] text-slate-400 font-medium hidden sm:block">من واقع تاريخ المعاينة</div>
+          </div>
+
+          <!-- Tier 5: Signed Deals (34% Width) -->
+          <div class="w-full flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="filterFunnelStage('DEALS')">
+            <div class="w-32 sm:w-44 text-right text-xs sm:text-sm font-bold text-slate-300 flex items-center justify-end gap-1.5">
+              <span>التعاقدات الموقعة</span>
+              <i class="fa-solid fa-file-signature text-amber-400"></i>
+            </div>
+            <div class="flex-1 flex justify-center">
+              <div class="w-[34%] py-3 px-4 rounded-xl bg-gradient-to-r from-amber-600 via-emerald-600 to-teal-500 text-white font-mono font-black text-xs sm:text-sm shadow-xl shadow-amber-900/40 flex items-center justify-between transition-all group-hover:scale-[1.02] group-hover:shadow-amber-500/30 border border-amber-400/40">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-award text-amber-300 text-xs"></i> <b id="funnelDeals">-</b></span>
+                <span id="funnelCloseRate" class="text-[10px] sm:text-xs font-bold text-amber-100 bg-amber-950/50 px-2 py-0.5 rounded-lg border border-amber-300/30">-</span>
+              </div>
+            </div>
+            <div class="w-24 sm:w-32 text-left text-[10px] text-slate-400 font-medium hidden sm:block">من واقع تاريخ التعاقد</div>
+          </div>
+
+        </div>
+
+        <!-- Funnel Summary Conversion Badges -->
+        <div class="mt-5 pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
+          <div class="flex items-center gap-2 flex-wrap text-[11px]">
+            <span class="text-slate-400 font-bold">معدل التحويل الكلي (Funnel Efficiency):</span>
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold font-mono border border-emerald-500/30" id="funnelTotalConversion">-</span>
+            <span class="text-slate-600">|</span>
+            <span class="text-slate-400 font-bold">معدل إغلاق المعاينات لعقود:</span>
+            <span class="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 font-bold font-mono border border-cyan-500/30" id="funnelMeetingToDealRate">-</span>
+          </div>
+          <div class="text-[10px] text-amber-400/90 font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-hand-pointer text-xs"></i> اضغط على أي شريط بالقمع لتصفية جدول العملاء فوراً حسب المرحلة
           </div>
         </div>
       </div>
@@ -1522,6 +1577,12 @@ async function generatePerfectPortal() {
       let str = String(dt).trim();
       let m = str.match(/(\\d{4})[-/](\\d{1,2})[-/](\\d{1,2})/);
       if (m) {
+        let y = m[1];
+        let p1 = parseInt(m[2], 10);
+        let p2 = parseInt(m[3], 10);
+        if (y === '2026' && p1 < 7 && p2 >= 7 && p2 <= 12) {
+          return y + '-' + String(p2).padStart(2, '0') + '-' + String(p1).padStart(2, '0');
+        }
         return m[1] + '-' + String(m[2]).padStart(2, '0') + '-' + String(m[3]).padStart(2, '0');
       }
       m = str.match(/(\\d{1,2})[-/](\\d{1,2})[-/](\\d{4})/);
@@ -1729,7 +1790,15 @@ async function generatePerfectPortal() {
               let dateFormatted = parseDateStr(rawCreated);
               const notes = notesIdx !== -1 ? cleanText(r[notesIdx]) : '-';
               const meetingDate = meetingIdx !== -1 ? parseDateStr(cleanText(r[meetingIdx])) : '';
-              const dealDate = dealIdx !== -1 ? parseDateStr(cleanText(r[dealIdx])) : '';
+              let dealDate = dealIdx !== -1 ? parseDateStr(cleanText(r[dealIdx])) : '';
+
+              if (meetingDate && dealDate && dealDate < meetingDate) {
+                const parts = dealDate.split('-');
+                if (parts.length === 3) {
+                  const candidate = parts[0] + '-' + parts[2] + '-' + parts[1];
+                  if (candidate >= meetingDate) dealDate = candidate;
+                }
+              }
 
               if (!dateFormatted && tab.name === 'Messages') {
                 dateFormatted = extractDateFromNote(notes) || meetingDate || dealDate || '2026-10-05';
@@ -2107,7 +2176,12 @@ async function generatePerfectPortal() {
         if (quickFilterState === 'MEETING' && (!l.meetingDate || l.meetingDate.trim() === '')) return false;
         if (quickFilterState === 'DEAL' && (!l.dealDate || l.dealDate.trim() === '')) return false;
 
-        if (l.date && (l.date < leadsStartDate || l.date > leadsEndDate)) return false;
+        // Date range inclusion: lead created in range, or meeting/deal held in range
+        const createdInRange = l.date && l.date >= leadsStartDate && l.date <= leadsEndDate;
+        const meetingInRange = l.meetingDate && l.meetingDate >= leadsStartDate && l.meetingDate <= leadsEndDate;
+        const dealInRange = l.dealDate && l.dealDate >= leadsStartDate && l.dealDate <= leadsEndDate;
+        if (!createdInRange && !meetingInRange && !dealInRange) return false;
+
         if (maxArea < 500 && l.areaNum > 0 && l.areaNum > maxArea) return false;
         if (st !== 'ALL' && l.status !== st) return false;
         if (deadSt !== 'ALL' && (!l.deadStatus || !l.deadStatus.toLowerCase().includes(deadSt.toLowerCase()))) return false;
@@ -2136,8 +2210,10 @@ async function generatePerfectPortal() {
       const qual = filteredLeads.filter(l => l.status === 'Qualified').length;
       const mid = filteredLeads.filter(l => l.areaCategory && (l.areaCategory.includes('150 - 250') || l.areaCategory.includes('150-250'))).length;
       const ksa = filteredLeads.filter(l => l.country && (l.country.includes('KSA') || l.country.includes('السعودية'))).length;
-      const meetings = filteredLeads.filter(l => l.meetingDate && l.meetingDate.trim() !== '').length;
-      const deals = filteredLeads.filter(l => l.dealDate && l.dealDate.trim() !== '').length;
+      
+      // Meetings and Deals active in the selected window:
+      const meetings = ALL_LEADS.filter(l => l.meetingDate && l.meetingDate >= leadsStartDate && l.meetingDate <= leadsEndDate).length;
+      const deals = ALL_LEADS.filter(l => l.dealDate && l.dealDate >= leadsStartDate && l.dealDate <= leadsEndDate).length;
 
       document.getElementById('kpiTotalLeads').innerText = total;
       document.getElementById('kpiQualified').innerText = qual;
@@ -2153,8 +2229,10 @@ async function generatePerfectPortal() {
       const qual = filteredLeads.filter(l => l.status === 'Qualified').length;
       const closedLost = filteredLeads.filter(l => l.deadStatus && l.deadStatus.toLowerCase().includes('closed lost')).length;
       const activePipeline = Math.max(0, qual - closedLost);
-      const meetings = filteredLeads.filter(l => l.meetingDate && l.meetingDate.trim() !== '').length;
-      const deals = filteredLeads.filter(l => l.dealDate && l.dealDate.trim() !== '').length;
+      
+      // Meetings and Deals active in the selected window:
+      const meetings = ALL_LEADS.filter(l => l.meetingDate && l.meetingDate >= leadsStartDate && l.meetingDate <= leadsEndDate).length;
+      const deals = ALL_LEADS.filter(l => l.dealDate && l.dealDate >= leadsStartDate && l.dealDate <= leadsEndDate).length;
 
       const fTotal = document.getElementById('funnelTotal');
       const fQual = document.getElementById('funnelQualified');
@@ -2177,10 +2255,23 @@ async function generatePerfectPortal() {
       if (fLost) fLost.innerText = closedLost;
       if (fScan) fScan.innerText = meetings;
       if (fScanRate) fScanRate.innerText = qual > 0 ? ((meetings / qual) * 100).toFixed(1) + '% من المؤهلين' : '0%';
-      if (fDeals) fDeals.innerText = deals;
-      if (fCloseRate) fCloseRate.innerText = meetings > 0 ? ((deals / meetings) * 100).toFixed(1) + '% إغلاق المعاينات' : (qual > 0 ? ((deals / qual) * 100).toFixed(1) + '% من المؤهلين' : '0%');
+      if (fCloseRate) {
+        if (meetings > 0 && deals <= meetings) {
+          fCloseRate.innerText = ((deals / meetings) * 100).toFixed(1) + '% إغلاق المعاينات';
+        } else if (qual > 0) {
+          fCloseRate.innerText = ((deals / qual) * 100).toFixed(1) + '% من المؤهلين';
+        } else {
+          fCloseRate.innerText = '0% Close Rate';
+        }
+      }
       if (fTotalConv) fTotalConv.innerText = total > 0 ? ((deals / total) * 100).toFixed(2) + '% (Deal / Lead)' : '0%';
-      if (fMeetingClose) fMeetingClose.innerText = meetings > 0 ? ((deals / meetings) * 100).toFixed(1) + '% (Deal / Scanning)' : '0%';
+      if (fMeetingClose) {
+        if (meetings > 0 && deals <= meetings) {
+          fMeetingClose.innerText = ((deals / meetings) * 100).toFixed(1) + '% (Deal / Scanning)';
+        } else {
+          fMeetingClose.innerText = total > 0 ? ((deals / total) * 100).toFixed(2) + '% (Deal / Lead)' : '0%';
+        }
+      }
     }
 
     function renderLeadsCharts() {
