@@ -1130,10 +1130,12 @@ async function generatePerfectPortal() {
             <input type="date" id="campEndDateInput" class="w-full px-3 py-2 rounded-xl bg-[#0b192c] border border-slate-700 text-xs sm:text-sm text-white focus:outline-none focus:border-blue-400" onchange="handleCampDateChange()">
           </div>
           <div class="sm:col-span-2 flex items-center gap-1.5 flex-wrap">
-            <button onclick="setCampDatePreset('ALL')" id="btnCampAll" class="flex-1 px-3 py-2 rounded-xl bg-blue-600 text-white font-black text-[11px] transition shadow-sm">All Time</button>
+            <button onclick="setCampDatePreset('ALL')" id="btnCampAll" class="flex-1 px-3 py-2 rounded-xl bg-blue-600 text-white font-black text-[11px] transition shadow-sm border border-blue-400">All Time</button>
             <button onclick="setCampDatePreset('JULY')" id="btnCampJuly" class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-400 text-[11px] text-slate-300 font-semibold transition">July</button>
             <button onclick="setCampDatePreset('AUG')" id="btnCampAug" class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-400 text-[11px] text-slate-300 font-semibold transition">August</button>
             <button onclick="setCampDatePreset('SEPT')" id="btnCampSept" class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-400 text-[11px] text-slate-300 font-semibold transition">Sept</button>
+            <button onclick="setCampDatePreset('LAST30')" id="btnCampLast30" class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-400 text-[11px] text-slate-300 font-semibold transition">30 Days</button>
+            <button onclick="setCampDatePreset('LAST14')" id="btnCampLast14" class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-400 text-[11px] text-slate-300 font-semibold transition">14 Days</button>
             <button onclick="setCampDatePreset('LAST7')" id="btnCampLast7" class="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-400 text-[11px] text-slate-300 font-semibold transition">7 Days</button>
           </div>
         </div>
@@ -1518,11 +1520,11 @@ async function generatePerfectPortal() {
     function parseDateStr(dt) {
       if (!dt) return '';
       let str = String(dt).trim();
-      let m = str.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+      let m = str.match(/(\\d{4})[-/](\\d{1,2})[-/](\\d{1,2})/);
       if (m) {
         return m[1] + '-' + String(m[2]).padStart(2, '0') + '-' + String(m[3]).padStart(2, '0');
       }
-      m = str.match(/(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+      m = str.match(/(\\d{1,2})[-/](\\d{1,2})[-/](\\d{4})/);
       if (m) {
         let p1 = parseInt(m[1], 10);
         let p2 = parseInt(m[2], 10);
@@ -1540,7 +1542,7 @@ async function generatePerfectPortal() {
 
     function extractDateFromNote(note) {
       if (!note) return '';
-      const m = String(note).match(/\b(\d{1,2})[-/](\d{1,2})\b/);
+      const m = String(note).match(/\\b(\\d{1,2})[-/](\\d{1,2})\\b/);
       if (m) {
         let d = parseInt(m[1], 10);
         let mo = parseInt(m[2], 10);
@@ -1720,7 +1722,7 @@ async function generatePerfectPortal() {
 
               let id = idIdx !== -1 ? cleanText(r[idIdx]) : '';
               if (!id && tab.name === 'Messages') {
-                id = 'msg_' + (phone.replace(/\D/g, '') || (rowIdx + 1));
+                id = 'msg_' + (phone.replace(/\\D/g, '') || (rowIdx + 1));
               }
 
               const rawCreated = createdIdx !== -1 ? cleanText(r[createdIdx]) : '';
@@ -1882,7 +1884,7 @@ async function generatePerfectPortal() {
       const adMap = {};
       adDataset.forEach(s => {
         if (s.adId && s.adName) {
-          const isSA = /\bSA\b/i.test(s.campaignName) || /\bSA\b/i.test(s.adsetName) || /\bSA\b/i.test(s.adName) || /مغتربين/i.test(s.campaignName);
+          const isSA = /\\bSA\\b/i.test(s.campaignName) || /\\bSA\\b/i.test(s.adsetName) || /\\bSA\\b/i.test(s.adName) || /مغتربين/i.test(s.campaignName);
           const tag = isSA ? '🇸🇦 [SA مغتربين]' : '🇪🇬 [EG مصر]';
           adMap[s.adId] = \`\${tag} \${s.adName}\`;
         }
@@ -2395,6 +2397,7 @@ async function generatePerfectPortal() {
     }
 
     function setCampDatePreset(preset) {
+      const today = new Date();
       const todayISO = getTodayISO();
       if (preset === 'ALL') {
         campStartDate = '2026-07-22';
@@ -2408,12 +2411,43 @@ async function generatePerfectPortal() {
       } else if (preset === 'SEPT') {
         campStartDate = '2026-09-01';
         campEndDate = todayISO;
+      } else if (preset === 'LAST30') {
+        const d = new Date(today);
+        d.setDate(d.getDate() - 30);
+        campStartDate = d.toISOString().slice(0, 10);
+        campEndDate = todayISO;
+      } else if (preset === 'LAST14') {
+        const d = new Date(today);
+        d.setDate(d.getDate() - 14);
+        campStartDate = d.toISOString().slice(0, 10);
+        campEndDate = todayISO;
       } else if (preset === 'LAST7') {
-        const d = new Date();
+        const d = new Date(today);
         d.setDate(d.getDate() - 7);
         campStartDate = d.toISOString().slice(0, 10);
         campEndDate = todayISO;
       }
+
+      // Dynamic Active State for Meta Preset Buttons
+      const campPresetIds = {
+        'ALL': 'btnCampAll',
+        'JULY': 'btnCampJuly',
+        'AUG': 'btnCampAug',
+        'SEPT': 'btnCampSept',
+        'LAST30': 'btnCampLast30',
+        'LAST14': 'btnCampLast14',
+        'LAST7': 'btnCampLast7'
+      };
+      for (const [key, btnId] of Object.entries(campPresetIds)) {
+        const btn = document.getElementById(btnId);
+        if (!btn) continue;
+        if (key === preset) {
+          btn.className = 'flex-1 px-3 py-2 rounded-xl bg-blue-600 text-white font-black text-[11px] transition shadow-md border border-blue-400';
+        } else {
+          btn.className = 'flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-blue-400 text-[11px] text-slate-300 font-semibold transition';
+        }
+      }
+
       document.getElementById('campStartDateInput').value = campStartDate;
       document.getElementById('campEndDateInput').value = campEndDate;
       applyCampFilters();
@@ -2732,7 +2766,7 @@ async function generatePerfectPortal() {
         const grouped = {};
         dataset.forEach(s => {
           const key = s.campaignId || s.campaignName;
-          const isSA = /\bSA\b/i.test(s.campaignName) || /مغتربين/i.test(s.campaignName);
+          const isSA = /\\bSA\\b/i.test(s.campaignName) || /مغتربين/i.test(s.campaignName);
           if (!grouped[key]) {
             grouped[key] = {
               id: s.campaignId || key,
@@ -2754,7 +2788,7 @@ async function generatePerfectPortal() {
         // Also include active campaigns that had CRM leads in range even if spend was 0 in dataset
         leadsInRange.forEach(l => {
           const key = l.campaignId || l.campaignName;
-          const isSA = /\bSA\b/i.test(l.campaignName) || /مغتربين/i.test(l.campaignName) || (l.country && l.country.includes('KSA'));
+          const isSA = /\\bSA\\b/i.test(l.campaignName) || /مغتربين/i.test(l.campaignName) || (l.country && l.country.includes('KSA'));
           if (key && !grouped[key]) {
             grouped[key] = {
               id: l.campaignId || key,
@@ -2843,7 +2877,7 @@ async function generatePerfectPortal() {
         const grouped = {};
         dataset.forEach(s => {
           const key = s.adsetId || s.adsetName;
-          const isSA = /\bSA\b/i.test(s.campaignName) || /\bSA\b/i.test(s.adsetName) || /مغتربين/i.test(s.campaignName);
+          const isSA = /\\bSA\\b/i.test(s.campaignName) || /\\bSA\\b/i.test(s.adsetName) || /مغتربين/i.test(s.campaignName);
           if (!grouped[key]) {
             grouped[key] = {
               id: s.adsetId || key,
@@ -2863,7 +2897,7 @@ async function generatePerfectPortal() {
 
         leadsInRange.forEach(l => {
           const key = l.adsetId || l.adsetName;
-          const isSA = /\bSA\b/i.test(l.campaignName) || /\bSA\b/i.test(l.adsetName) || /مغتربين/i.test(l.campaignName) || (l.country && l.country.includes('KSA'));
+          const isSA = /\\bSA\\b/i.test(l.campaignName) || /\\bSA\\b/i.test(l.adsetName) || /مغتربين/i.test(l.campaignName) || (l.country && l.country.includes('KSA'));
           if (key && !grouped[key]) {
             grouped[key] = {
               id: l.adsetId || key,
@@ -2947,7 +2981,7 @@ async function generatePerfectPortal() {
         const grouped = {};
         dataset.forEach(s => {
           const key = s.adId || (s.adsetId + '_' + s.adName);
-          const isSA = /\bSA\b/i.test(s.campaignName) || /\bSA\b/i.test(s.adsetName) || /\bSA\b/i.test(s.adName) || /مغتربين/i.test(s.campaignName);
+          const isSA = /\\bSA\\b/i.test(s.campaignName) || /\\bSA\\b/i.test(s.adsetName) || /\\bSA\\b/i.test(s.adName) || /مغتربين/i.test(s.campaignName);
           if (!grouped[key]) {
             grouped[key] = {
               id: s.adId || key,
@@ -2969,7 +3003,7 @@ async function generatePerfectPortal() {
 
         leadsInRange.forEach(l => {
           const key = l.adId || (l.adsetId + '_' + l.adName);
-          const isSA = /\bSA\b/i.test(l.campaignName) || /\bSA\b/i.test(l.adsetName) || /\bSA\b/i.test(l.adName) || /مغتربين/i.test(l.campaignName) || (l.country && l.country.includes('KSA'));
+          const isSA = /\\bSA\\b/i.test(l.campaignName) || /\\bSA\\b/i.test(l.adsetName) || /\\bSA\\b/i.test(l.adName) || /مغتربين/i.test(l.campaignName) || (l.country && l.country.includes('KSA'));
           if (key && !grouped[key]) {
             grouped[key] = {
               id: l.adId || key,
